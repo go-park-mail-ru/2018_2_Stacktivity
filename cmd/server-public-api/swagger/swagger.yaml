@@ -1,0 +1,303 @@
+swagger: '2.0'
+info:
+  title: forum
+  description: |
+    Документация для учебного проекта 
+    Технопарке Mail.ru (https://park.mail.ru).
+  version: "0.1.0"
+schemes:
+- http
+- https
+basePath: /api
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /registration:
+    post:
+      summary: Регистрация
+      description: |
+        Регистрация на сайте.
+      parameters:
+      - name: user
+        in: body
+        description: Данные регистрации.
+        required: true
+        schema:
+          $ref: '#/definitions/RegistrationRequest'
+      responses:
+        200:
+          description: |
+            Регистрация прошла успешно, в cookie записан session-id.
+          schema:
+            $ref: '#/definitions/RegistrationResponse'
+        400:
+          description: |
+            Некорректный запрос. Регистрация прошла не успешно. В полях валидации записана ошибка.
+          schema:
+            $ref: '#/definitions/RegistrationResponse'
+        500:
+          description: |
+            Ошибка на стороне сервера.
+        
+  /login:
+    post:
+      summary: Авторизация
+      description: |
+        Авторизация на сайте.
+      parameters:
+      - name: user
+        in: body
+        description: Данные авторизации.
+        required: true
+        schema:
+          $ref: '#/definitions/LoginRequest'
+      responses:
+        200:
+          description: |
+            Авторизация прошла успешно, в cookie записан session-id.
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        400:
+          description: |
+            Некорректный запрос. Авторизация прошла не успешно. В полях валидации записана ошибка.
+          schema:
+            $ref: '#/definitions/LoginResponse'
+        500:
+          description: |
+            Ошибка на стороне сервера.
+            
+  /logout:
+    get:
+      summary: Выход
+      description: |
+        Выход с сайта.
+      responses:
+        200:
+          description: |
+            Выход прошел успешно, cookie удалены.
+        500:
+          description: |
+            Ошибка на стороне сервера.
+  
+  /me:
+    get:
+      summary: Получение информации о текущем пользователе
+      description: |
+        Получение информации о пользователе, session-id которого лежит в cookie.
+      responses:
+        200:
+          description: |
+            Информация о пользователе.
+          schema:
+            $ref: '#/definitions/User'
+        404:
+          description: |
+            Пользователь не авторизован.
+            
+  /profile:
+    post:
+      summary: Изменение информации о текущем пользователе
+      description: |
+        Изменение информации информации о пользователе, session-id которого лежит в cookie.
+      responses:
+        200:
+          description: |
+            Актуальная информация о пользователе после изменения профиля.
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: |
+            Недопустимый запрос.
+            schema:
+              $ref: '#/definitions/Error'
+        404:
+          description: |
+            Пользователь отсутсвует в системе.
+        409:
+          description: |
+            Новые данные профиля пользователя конфликтуют с имеющимися пользователями.
+          schema:
+            $ref: '#/definitions/Error'
+            
+  /scoreboard:
+    get:
+      parameters:
+      - in: query
+        name: page
+        type: integer
+      description: |
+        Получение cтраницы таблицы лидеров.
+      consumes: []
+      operationId: getScoreboard
+      responses:
+        200:
+          description: |
+            Информация о пользователе.
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        500:
+          description: |
+            Ошиюка на стороне сервера.
+          
+definitions:
+  Error:
+    type: object
+    properties:
+      message:
+        type: string
+        readOnly: true
+        description: |
+          Текстовое описание ошибки.
+          В процессе проверки API никаких проверок на содерижимое данного описание не делается.
+        example: |
+          Can't find user with id #42
+
+  UserUpdate:
+    description: |
+      Информация о пользователе.
+    type: object
+    properties:
+      username:
+        type: string
+        format: identity
+        description: |
+          Имя пользователя (уникальное поле).
+          Данное поле допускает только латиницу, цифры и знак подчеркивания.
+          Сравнение имени регистронезависимо.
+        example: j.sparrow
+      email:
+        type: string
+        format: email
+        description: Почтовый адрес пользователя (уникальное поле).
+        example: captaina@blackpearl.sea
+      avatar:
+        type: string
+        format: url
+        example: avatar.jpg
+        description: URL к аватару пользователя.
+  
+  User:
+    description: |
+      Информация о пользователе.
+    type: object
+    properties:
+      username:
+        type: string
+        format: identity
+        description: |
+          Имя пользователя (уникальное поле).
+          Данное поле допускает только латиницу, цифры и знак подчеркивания.
+          Сравнение имени регистронезависимо.
+        example: j.sparrow
+      email:
+        type: string
+        format: email
+        description: Почтовый адрес пользователя (уникальное поле).
+        example: captaina@blackpearl.sea
+      avatar:
+        type: string
+        format: url
+        example: avatar.jpg
+        description: URL к аватару пользователя.
+      score:
+        type: integer
+        description: |
+          Количество игровых очков пользователя.
+    required:
+    - nickname
+    - email
+
+  Validate:
+    type: object
+    description: |
+      Валидация сервера.
+    properties:
+      success:
+        type: boolean
+        description: Валидация прошла успешно.
+      error:
+        $ref: '#/definitions/Error'
+    required:
+    - success
+    
+  RegistrationRequest:
+    type: object
+    description: |
+      Форма регистрации.
+    properties:
+      username:
+        type: string
+      email:
+        type: string
+        format: email
+      password1:
+        type: string
+      password2:
+        type: string
+      avatar:
+        type: string
+        format: url
+    required:
+    - username
+    - email
+    - password1
+    - password2
+    
+  LoginRequest:
+    type: object
+    description: |
+      Форма логина.
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+    required:
+    - username
+    - password
+    
+  RegistrationResponse:
+    type: object
+    description: |
+      Ответ от регистрации.
+    properties:
+      ValidateSuccess:
+        type: boolean
+        description: Регистрация прошла успешно.
+      user:
+        $ref: '#/definitions/User'
+      usernameValidate: 
+        $ref: '#/definitions/Validate'
+      emailValidate:
+        $ref: '#/definitions/Validate'
+      passwordValidate: 
+        $ref: '#/definitions/Validate'
+      error:
+        $ref: '#/definitions/Error'
+    required:
+    - statusSuccess
+        
+  LoginResponse:
+    type: object
+    description: |
+      Ответ от логина.
+    properties:
+      statusSuccess:
+        type: boolean
+        description: Авторизация прошла успешно.
+      user:
+        $ref: '#/definitions/User'
+      usernameValidate: 
+        $ref: '#/definitions/Validate'
+      passwordValidate: 
+        $ref: '#/definitions/Validate'
+      error:
+        $ref: '#/definitions/Error'
+    required:
+    - statusSuccess
+      
+      

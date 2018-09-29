@@ -55,9 +55,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
 }
 
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
+	
 	srv.log.Infoln(r.Method + " " + r.URL.Path)
 	var head string
 	head, r.URL.Path = ShiftPath(r.URL.Path)

@@ -61,10 +61,15 @@ func main() {
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
 	srv.log.Infoln(r.Method + " " + r.URL.Path)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	var head string
 	head, r.URL.Path = ShiftPath(r.URL.Path)
 	switch head {

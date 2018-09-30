@@ -17,10 +17,11 @@ type UserStorage struct {
 }
 
 type statements struct {
-	addUser       *sql.Stmt
-	getByUsername *sql.Stmt
-	getByID       *sql.Stmt
-	getAll        *sql.Stmt
+	addUser        *sql.Stmt
+	getByUsername  *sql.Stmt
+	getByID        *sql.Stmt
+	getAll         *sql.Stmt
+	getWithOptions *sql.Stmt
 }
 
 func NewUserStorage(db *sql.DB) *UserStorage {
@@ -46,6 +47,10 @@ func (s *UserStorage) Prepare() error {
 		return errors.Wrap(err, "can't prepare statements")
 	}
 	s.stmts.getAll, err = s.DB.Prepare(getAll)
+	if err != nil {
+		return errors.Wrap(err, "can't prepare statements")
+	}
+	s.stmts.getWithOptions, err = s.DB.Prepare(getWithOptions)
 	if err != nil {
 		return errors.Wrap(err, "can't prepare statements")
 	}
@@ -136,13 +141,37 @@ func (s *UserStorage) GetAll() ([]User, error) {
 	return users, nil
 }
 
+var getWithOptions = `SELECT uid, username, email, score FROM users LIMIT $1 OFFSET $2;`
+
+func (s *UserStorage) GetWithOptions(limit int, offset int) ([]User, error) {
+	users := make([]User, 0)
+	rows, err := s.stmts.getWithOptions.Query(limit, offset)
+	if err != nil {
+		return users, errors.Wrap(err, "failed to query database")
+	}
+	for rows.Next() {
+		var id, score int
+		var username, email string
+		if err := rows.Scan(&id, &username, &email, &score); err != nil {
+			log.Fatal(err)
+		}
+		users = append(users, User{
+			ID:       id,
+			Username: username,
+			Email:    email,
+			Score:    score,
+		})
+	}
+	return users, nil
+}
+
 type UserStorageI interface {
 	Add(User) (int, error)
 	GetByUsername(string) (User, bool, error)
 	GetByID(int) (User, bool, error)
 	Has(string) bool
 	GetAll() ([]User, error)
-
+	GetWithOptions(int, int) ([]User, error)
 	Prepare() error
 }
 

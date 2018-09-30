@@ -1,127 +1,302 @@
 package main
 
 import (
+	"2018_2_Stacktivity/cmd/server-public-api/requests"
+	"2018_2_Stacktivity/cmd/server-public-api/responses"
 	"2018_2_Stacktivity/cmd/server-public-api/session"
 	"2018_2_Stacktivity/cmd/server-public-api/storage"
-	"database/sql"
-	"flag"
+	"2018_2_Stacktivity/cmd/server-public-api/validate"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
-	"os"
-	"path"
-	"strings"
+	"sort"
+	"strconv"
+	"time"
 
-	_ "github.com/lib/pq"
-	log "github.com/sirupsen/logrus"
+	"github.com/google/uuid"
 )
 
-type Server struct {
-	sm    session.SessionManagerI
-	users storage.UserStorageI
-	log   *log.Logger
-}
-
-func NewServer(logger *log.Logger, db *sql.DB) *Server {
-	return &Server{
-		sm:    session.NewSessionManager(),
-		log:   logger,
-		users: storage.NewUserStorage(db),
-	}
-}
-
-func main() {
-	flag.Parse()
-	logger := log.New()
-	logger.SetLevel(log.InfoLevel)
-	logger.SetOutput(os.Stdout) // TODO write log in file
-
-	db, err := sql.Open("postgres", config.DB)
-	if err != nil {
-		log.Fatal(err.Error())
-		return
-	}
-	err = db.Ping()
-	if err != nil {
-		log.Fatal(err.Error())
-		return
-	}
-
-	srv := NewServer(logger, db)
-	err = srv.users.Prepare()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	log.Infof("starting server listening on %s", config.Port)
-	err = http.ListenAndServe(config.Port, srv)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-}
-
-func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-	srv.log.Infoln(r.Method + " " + r.URL.Path)
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-	var head string
-	head, r.URL.Path = ShiftPath(r.URL.Path)
-	switch head {
-	case "user":
-		srv.RouteUser(w, r)
-	case "session":
-		srv.RouteSession(w, r)
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
-	}
-}
-
-func (srv *Server) RouteUser(w http.ResponseWriter, r *http.Request) {
-	var head string
-	head, _ = ShiftPath(r.URL.Path)
-	if head == "" {
-		switch r.Method {
-		case http.MethodGet:
-			srv.getUsers(w, r)
-		case http.MethodPost:
-			srv.createUser(w, r)
-		default:
-			w.WriteHeader(http.StatusMethodNotAllowed)
+func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		err := responses.WriteResponse(w, http.StatusBadRequest, &responses.ResponseForm{
+			ValidateSuccess: false,
+			Error:           responses.NewError("Bad method"),
+		})
+		if err != nil {
+			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}
-	switch r.Method {
-	case http.MethodGet:
-		srv.getUser(w, r)
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+
+	var registrationReq requests.Registration
+	defer r.Body.Close()
+	req, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal(req, &registrationReq)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	response := validate.RegistrationValidate(&registrationReq)
+	if !response.ValidateSuccess {
+		err = responses.WriteResponse(w, http.StatusBadRequest, response)
+		if err != nil {
+			srv.log.Warnf("error in /registration: %s", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	newUser := storage.NewUser(registrationReq.Username, registrationReq.Email, registrationReq.Password1)
+	if srv.users.Has(newUser.Username) {
+		response.ValidateSuccess = false
+		response.Error = &responses.Error{
+			Message: "Username already exists",
+		}
+		err = responses.WriteResponse(w, http.StatusBadRequest, response)
+		if err != nil {
+			srv.log.Warnf("error in %d: %s", r.URL.Path, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	id, err := srv.users.Add(newUser)
+	if err != nil {
+		srv.log.Warnln("Can't create session")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	newUser.ID = id
+
+	sess, err := srv.sm.Create(&session.Session{
+		Username:  registrationReq.Username,
+		Useragent: r.UserAgent(),
+	})
+	if err != nil {
+		srv.log.Warnln("Can't create session")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session-id",
+		Value:   sess.ID.String(),
+		Expires: time.Now().Add(365 * 24 * time.Hour),
+	})
+
+	err = responses.WriteResponse(w, http.StatusOK, &responses.ResponseForm{
+		ValidateSuccess: true,
+		User:            &newUser,
+	})
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 }
 
-func (srv *Server) RouteSession(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-		srv.getSession(w, r)
-	case http.MethodPost:
-		srv.createSession(w, r)
-	case http.MethodDelete:
-		srv.deleteSession(w, r)
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		err := responses.WriteResponse(w, http.StatusBadRequest, &responses.ResponseForm{
+			ValidateSuccess: false,
+			Error:           responses.NewError("Bad method"),
+		})
+		if err != nil {
+			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+	var loginReq requests.Login
+	defer r.Body.Close()
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if err = json.Unmarshal(body, &loginReq); err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	response := validate.LoginValidate(&loginReq)
+	if !response.ValidateSuccess {
+		if err = responses.WriteResponse(w, http.StatusBadRequest, response); err != nil {
+			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
+	user, find, err := srv.users.GetByUsername(loginReq.Username)
+	if !find || err != nil {
+		response.ValidateSuccess = false
+		response.Error = &responses.Error{
+			Message: "Incorrect login or password",
+		}
+		if err = responses.WriteResponse(w, http.StatusBadRequest, response); err != nil {
+			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+	if !storage.CheckPassword(loginReq.Username, loginReq.Password, user.Password) {
+		response.ValidateSuccess = false
+		response.Error = &responses.Error{
+			Message: "Incorrect login or password",
+		}
+		if err = responses.WriteResponse(w, http.StatusBadRequest, response); err != nil {
+			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+	sess, err := srv.sm.Create(&session.Session{
+		Username: loginReq.Username,
+	})
+	if err != nil {
+		srv.log.Infoln("Can't create session")
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	cookie := http.Cookie{
+		Name:    "session-id",
+		Value:   sess.ID.String(),
+		Expires: time.Now().Add(365 * 24 * time.Hour),
+	}
+	http.SetCookie(w, &cookie)
+	response.User = &user
+	if err = responses.WriteResponse(w, http.StatusOK, response); err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
-func ShiftPath(p string) (head, tail string) {
-	p = path.Clean("/" + p)
-	i := strings.Index(p[1:], "/") + 1
-	if i <= 0 {
-		return p[1:], "/"
+func (srv *Server) deleteSession(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session-id")
+	if err == http.ErrNoCookie {
+		w.WriteHeader(http.StatusOK)
+		return
 	}
-	return p[1:i], p[i:]
+	if err != nil {
+		srv.log.Warnln(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	id, err := uuid.Parse(cookie.Value)
+	if err != nil {
+		srv.log.Warnln(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	sessionID := &session.SessionID{
+		ID: id,
+	}
+	srv.sm.Delete(sessionID)
+	w.WriteHeader(http.StatusOK)
+}
+
+func (srv *Server) getSession(w http.ResponseWriter, r *http.Request) {
+	s, err := r.Cookie("session-id")
+	if err == http.ErrNoCookie {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	id, err := uuid.Parse(s.Value)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	sess := srv.sm.Check(&session.SessionID{
+		ID: id,
+	})
+	if sess == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	user, find, err := srv.users.GetByUsername(sess.Username)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if !find {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if err = responses.WriteResponse(w, http.StatusOK, user); err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {
+	var head string
+	head, r.URL.Path = ShiftPath(r.URL.Path)
+	id, err := strconv.Atoi(head)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	user, find, err := srv.users.GetByID(id)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if !find {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if err = responses.WriteResponse(w, http.StatusOK, user); err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func (srv *Server) getUsers(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var users []storage.User
+	pageNum := -1
+	page, ok := r.URL.Query()["page"]
+	if ok {
+		pageNum, err = strconv.Atoi(page[0])
+		if err != nil {
+			pageNum = -1
+		}
+	}
+	if pageNum <= 0 {
+		users, err = srv.users.GetAll()
+	} else {
+		users, err = srv.users.GetWithOptions(config.PageSize, (pageNum-1)*config.PageSize)
+	}
+
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	sort.Sort(storage.Users(users))
+	err = responses.WriteResponse(w, http.StatusOK, users)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }

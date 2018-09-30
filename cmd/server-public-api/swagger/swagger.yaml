@@ -14,34 +14,22 @@ consumes:
 produces:
 - application/json
 paths:
-  /registration:
-    post:
-      summary: Регистрация
+  /session:
+    get:
+      summary: Получение информации о текущем пользователе cookie
       description: |
-        Регистрация на сайте.
-      parameters:
-      - name: user
-        in: body
-        description: Данные регистрации.
-        required: true
-        schema:
-          $ref: '#/definitions/RegistrationRequest'
+        Получение информации о пользователе, session-id которого лежит в cookie.
       responses:
         200:
           description: |
-            Регистрация прошла успешно, в cookie записан session-id.
+            Информация о пользователе.
           schema:
-            $ref: '#/definitions/RegistrationResponse'
-        400:
+            $ref: '#/definitions/User'
+        401:
           description: |
-            Некорректный запрос. Регистрация прошла не успешно. В полях валидации записана ошибка.
-          schema:
-            $ref: '#/definitions/RegistrationResponse'
-        500:
-          description: |
-            Ошибка на стороне сервера.
+            Пользователь не авторизован.
         
-  /login:
+            
     post:
       summary: Авторизация
       description: |
@@ -54,7 +42,7 @@ paths:
         schema:
           $ref: '#/definitions/LoginRequest'
       responses:
-        200:
+        201:
           description: |
             Авторизация прошла успешно, в cookie записан session-id.
           schema:
@@ -67,68 +55,28 @@ paths:
         500:
           description: |
             Ошибка на стороне сервера.
-            
-  /logout:
-    get:
+    
+    delete:
       summary: Выход
       description: |
         Выход с сайта.
       responses:
         200:
           description: |
-            Выход прошел успешно, cookie удалены.
+            Выход прошел успешно, session-id удален.
         500:
           description: |
             Ошибка на стороне сервера.
-  
-  /me:
+  /user:
     get:
-      summary: Получение информации о текущем пользователе
-      description: |
-        Получение информации о пользователе, session-id которого лежит в cookie.
-      responses:
-        200:
-          description: |
-            Информация о пользователе.
-          schema:
-            $ref: '#/definitions/User'
-        404:
-          description: |
-            Пользователь не авторизован.
-            
-  /profile:
-    post:
-      summary: Изменение информации о текущем пользователе
-      description: |
-        Изменение информации информации о пользователе, session-id которого лежит в cookie.
-      responses:
-        200:
-          description: |
-            Актуальная информация о пользователе после изменения профиля.
-          schema:
-            $ref: '#/definitions/User'
-        400:
-          description: |
-            Недопустимый запрос.
-            schema:
-              $ref: '#/definitions/Error'
-        404:
-          description: |
-            Пользователь отсутсвует в системе.
-        409:
-          description: |
-            Новые данные профиля пользователя конфликтуют с имеющимися пользователями.
-          schema:
-            $ref: '#/definitions/Error'
-            
-  /scoreboard:
-    get:
-      parameters:
-      - in: query
-        name: page
-        type: integer
+      summary: Список пользователей
       description: |
         Получение cтраницы таблицы лидеров.
+      parameters: 
+        - in: query
+          name: page
+          type: integer
+          required: false
       consumes: []
       operationId: getScoreboard
       responses:
@@ -139,10 +87,66 @@ paths:
             type: array
             items:
               $ref: '#/definitions/User'
+        400:
+          description: |
+            Некорректный запрос.
         500:
           description: |
             Ошиюка на стороне сервера.
-          
+    
+    post:
+      summary: Регистрация нового пользователя
+      description: |
+        Регистрация на сайте.
+      parameters:
+      - name: user
+        in: body
+        description: Данные регистрации.
+        required: true
+        schema:
+          $ref: '#/definitions/RegistrationRequest'
+      responses:
+        201:
+          description: |
+            Регистрация прошла успешно, в cookie записан session-id.
+          schema:
+            $ref: '#/definitions/RegistrationResponse'
+        400:
+          description: |
+            Некорректный запрос. Регистрация прошла не успешно. В полях валидации записана ошибка.
+          schema:
+            $ref: '#/definitions/RegistrationResponse'
+        500:
+          description: |
+            Ошибка на стороне сервера.
+      
+  /user/{id}:
+    get:
+      summary: Информация о пользователе
+      parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+      responses:
+        200:
+          description: |
+            Запрос выполнен успешно.
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: |
+            Недопустимый запрос.
+        401:
+          description: |
+            Не авторизован.
+        404:
+          description: |
+            Пользователь отсутсвует в системе.
+        500:
+          description: |
+            Ошибка на стороне сервера.
+        
 definitions:
   Error:
     type: object
@@ -185,6 +189,12 @@ definitions:
       Информация о пользователе.
     type: object
     properties:
+      id:
+        type: integer
+        format: identity
+        description: |
+          ID пользователя (уникальное поле).
+          Данное поле допускает только цифры.
       username:
         type: string
         format: identity

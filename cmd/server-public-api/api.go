@@ -9,10 +9,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"strconv"
 	"time"
-
-	"sort"
 
 	"github.com/google/uuid"
 )
@@ -272,7 +271,22 @@ func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) getUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := srv.users.GetAll()
+	var err error
+	var users []storage.User
+	pageNum := -1
+	page, ok := r.URL.Query()["page"]
+	if ok {
+		pageNum, err = strconv.Atoi(page[0])
+		if err != nil {
+			pageNum = -1
+		}
+	}
+	if pageNum <= 0 {
+		users, err = srv.users.GetAll()
+	} else {
+		users, err = srv.users.GetWithOptions(config.PageSize, (pageNum-1)*config.PageSize)
+	}
+
 	if err != nil {
 		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

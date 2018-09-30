@@ -21,5 +21,5 @@ func init() {
 	flag.StringVar(&config.DB, "database DSN", "user=postgres password=postgres dbname=db-tech sslmode=disable", "DSN for database")
 	flag.StringVar(&config.APIPrefix, "prefix URL for API", "/api/v1", "URL for requests for API")
 
-	flag.IntVar(&config.PageSize, "size of scroboard page", 10, "set size for user scoreboard pages")
+	flag.IntVar(&config.PageSize, "size of scroboard page", 5, "set size for user scoreboard pages")
 }

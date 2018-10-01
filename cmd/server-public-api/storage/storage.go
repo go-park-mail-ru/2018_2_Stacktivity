@@ -18,6 +18,8 @@ type UserStorage struct {
 
 type statements struct {
 	addUser        *sql.Stmt
+	updateUser     *sql.Stmt
+	getByEmail     *sql.Stmt
 	getByUsername  *sql.Stmt
 	getByID        *sql.Stmt
 	getAll         *sql.Stmt
@@ -38,11 +40,19 @@ func (s *UserStorage) Prepare() error {
 	if err != nil {
 		return errors.Wrap(err, "can't prepare statements")
 	}
+	s.stmts.updateUser, err = s.DB.Prepare(updateUser)
+	if err != nil {
+		return errors.Wrap(err, "can't prepare statements")
+	}
 	s.stmts.getByID, err = s.DB.Prepare(getByID)
 	if err != nil {
 		return errors.Wrap(err, "can't prepare statements")
 	}
 	s.stmts.getByUsername, err = s.DB.Prepare(getByUsername)
+	if err != nil {
+		return errors.Wrap(err, "can't prepare statements")
+	}
+	s.stmts.getByEmail, err = s.DB.Prepare(getByEmail)
 	if err != nil {
 		return errors.Wrap(err, "can't prepare statements")
 	}
@@ -60,12 +70,45 @@ func (s *UserStorage) Prepare() error {
 var addUser = `INSERT INTO users (username, email, pass) VALUES ($1, $2, $3) RETURNING uID;`
 
 func (s *UserStorage) Add(user User) (uid int, err error) {
-	err = s.stmts.addUser.QueryRow(user.Username, user.Email, createPassword(user.Username, user.Password)).Scan(&uid)
+	err = s.stmts.addUser.QueryRow(user.Username, user.Email, createPassword(user.Password)).Scan(&uid)
 	if err != nil {
 		err = errors.Wrap(err, "failed to query database")
 		return 0, err
 	}
 	return uid, nil
+}
+
+var updateUser = `UPDATE users SET username = $2, email = $3, pass = $4 WHERE uID = $1;`
+
+func (s *UserStorage) Update(user User) error {
+	_, err := s.stmts.updateUser.Exec(user.ID, user.Username, user.Email, createPassword(user.Password))
+	if err != nil {
+		err = errors.Wrap(err, "failed to query database")
+		return err
+	}
+	return nil
+}
+
+var getByEmail = `SELECT uid, username, email, pass, score FROM users WHERE users.email = $1 LIMIT 1;`
+
+func (s *UserStorage) GetByEmail(username string) (User, bool, error) {
+	var uid, score int
+	var name, email, password string
+	err := s.stmts.getByEmail.QueryRow(username).Scan(&uid, &name, &email, &password, &score)
+	if err == sql.ErrNoRows {
+		return User{}, false, nil
+	}
+	if err != nil {
+		return User{}, false, errors.Wrap(err, "failed to query database")
+	}
+	resUser := User{
+		ID:       uid,
+		Username: name,
+		Email:    email,
+		Password: password,
+		Score:    score,
+	}
+	return resUser, true, nil
 }
 
 var getByUsername = `SELECT uid, username, email, pass, score FROM users WHERE users.username = $1 LIMIT 1;`
@@ -93,9 +136,9 @@ func (s *UserStorage) GetByUsername(username string) (User, bool, error) {
 var getByID = `SELECT uid, username, email, pass, score FROM users WHERE users.uid = $1 LIMIT 1;`
 
 func (s *UserStorage) GetByID(id int) (User, bool, error) {
-	var uid, score int
+	var uID, score int
 	var name, email, password string
-	err := s.stmts.getByID.QueryRow(id).Scan(&uid, &name, &email, &password, &score)
+	err := s.stmts.getByID.QueryRow(id).Scan(&uID, &name, &email, &password, &score)
 	if err == sql.ErrNoRows {
 		return User{}, false, nil
 	}
@@ -103,7 +146,7 @@ func (s *UserStorage) GetByID(id int) (User, bool, error) {
 		return User{}, false, errors.Wrap(err, "failed to query getById")
 	}
 	resUser := User{
-		ID:       uid,
+		ID:       uID,
 		Username: name,
 		Email:    email,
 		Password: password,
@@ -167,6 +210,8 @@ func (s *UserStorage) GetWithOptions(limit int, offset int) ([]User, error) {
 
 type UserStorageI interface {
 	Add(User) (int, error)
+	Update(User) error
+	GetByEmail(string) (User, bool, error)
 	GetByUsername(string) (User, bool, error)
 	GetByID(int) (User, bool, error)
 	Has(string) bool
@@ -207,14 +252,14 @@ func (u Users) Swap(i, j int) {
 	u[i], u[j] = u[j], u[i]
 }
 
-func createPassword(username string, password string) string {
-	hash1 := fmt.Sprintf("%x", md5.Sum([]byte(username+password)))
+func createPassword(password string) string {
+	hash1 := fmt.Sprintf("%x", md5.Sum([]byte("key"+password)))
 	hash2 := fmt.Sprint("%x", md5.Sum([]byte(hash1)))
 	return fmt.Sprint("%x", md5.Sum([]byte(hash2)))
 }
 
-func CheckPassword(username string, password string, correct string) bool {
-	hash1 := fmt.Sprintf("%x", md5.Sum([]byte(username+password)))
+func CheckPassword(password string, correct string) bool {
+	hash1 := fmt.Sprintf("%x", md5.Sum([]byte("key"+password)))
 	hash2 := fmt.Sprint("%x", md5.Sum([]byte(hash1)))
 	hash3 := fmt.Sprint("%x", md5.Sum([]byte(hash2)))
 	return strings.EqualFold(hash3, correct)

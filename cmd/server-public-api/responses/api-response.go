@@ -22,16 +22,12 @@ type Validate struct {
 }
 
 type ResponseForm struct {
-	ValidateSuccess  bool          `json:"statusSuccess"`
+	ValidateSuccess  bool          `json:"validateSuccess"`
 	User             *storage.User `json:"user,omitempty"`
 	UsernameValidate *Validate     `json:"usernameValidate,omitempty"`
 	EmailValidate    *Validate     `json:"emailValidate,omitempty"`
 	PasswordValidate *Validate     `json:"passwordValidate,omitempty"`
 	Error            *Error        `json:"error,omitempty"`
-}
-
-type Scroreboard struct {
-	Board []storage.User `json:"scoreboard"`
 }
 
 func WriteResponse(w http.ResponseWriter, statusCode int, response interface{}) error {

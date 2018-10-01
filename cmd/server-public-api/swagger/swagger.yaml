@@ -1,3 +1,4 @@
+
 swagger: '2.0'
 info:
   title: forum
@@ -146,7 +147,37 @@ paths:
         500:
           description: |
             Ошибка на стороне сервера.
-        
+    put:
+      summary: Обновить данные пользователя
+      parameters: 
+      - in: path
+        name: id
+        type: integer
+        required: true
+      - in: body
+        description: Данные регистрации.
+        required: true
+        schema:
+          $ref: '#/definitions/UserUpdate'
+      responses:
+        200:
+          description: |
+            Данные пользователя успешно обновлены.
+          schema:
+            $ref: '#/definitions/UpdateResponse'
+        400:
+          description: |
+            Недопустимый запрос.
+        401:
+          description: |
+            Не авторизован.
+        404:
+          description: |
+            Пользователь отсутсвует в системе.
+        500:
+          description: |
+            Ошибка на стороне сервера.
+            
 definitions:
   Error:
     type: object
@@ -289,14 +320,14 @@ definitions:
       error:
         $ref: '#/definitions/Error'
     required:
-    - statusSuccess
+    - ValidateSuccess
         
   LoginResponse:
     type: object
     description: |
       Ответ от логина.
     properties:
-      statusSuccess:
+      ValidateSuccess:
         type: boolean
         description: Авторизация прошла успешно.
       user:
@@ -308,6 +339,24 @@ definitions:
       error:
         $ref: '#/definitions/Error'
     required:
-    - statusSuccess
-      
+    - ValidateSuccess
+    
+  UpdateResponse:
+    type: object
+    description: |
+      Ответ обновления аккаунта.
+    properties:
+      ValidateSuccess:
+        type: boolean
+        description: Обновление прошло успешно.
+      user:
+        $ref: '#/definitions/User'
+      usernameValidate: 
+        $ref: '#/definitions/Validate'
+      emailValidate: 
+        $ref: '#/definitions/Validate'
+      error:
+        $ref: '#/definitions/Error'
+    required:
+    - ValidateSuccess
       

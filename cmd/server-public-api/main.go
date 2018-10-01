@@ -99,6 +99,8 @@ func (srv *Server) RouteUser(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		srv.getUser(w, r)
+	case http.MethodPut:
+		srv.updateUser(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}

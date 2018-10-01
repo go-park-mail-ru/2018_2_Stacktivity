@@ -69,9 +69,30 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, hasEmail, err := srv.users.GetByEmail(newUser.Email)
+	if err != nil {
+		srv.log.Warnf("error in %d: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if hasEmail {
+		response.ValidateSuccess = false
+		response.Error = &responses.Error{
+			Message: "Email already exists",
+		}
+		err = responses.WriteResponse(w, http.StatusBadRequest, response)
+		if err != nil {
+			srv.log.Warnf("error in %d: %s", r.URL.Path, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
 	id, err := srv.users.Add(newUser)
 	if err != nil {
-		srv.log.Warnln("Can't create session")
+		srv.log.Warnln("Can't add user into db", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -82,7 +103,7 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		Useragent: r.UserAgent(),
 	})
 	if err != nil {
-		srv.log.Warnln("Can't create session")
+		srv.log.Warnln("Can't create session", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -152,7 +173,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if !storage.CheckPassword(loginReq.Username, loginReq.Password, user.Password) {
+	if !storage.CheckPassword(loginReq.Password, user.Password) {
 		response.ValidateSuccess = false
 		response.Error = &responses.Error{
 			Message: "Incorrect login or password",
@@ -187,7 +208,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) deleteSession(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session-id")
+	s, err := r.Cookie("session-id")
 	if err == http.ErrNoCookie {
 		w.WriteHeader(http.StatusOK)
 		return
@@ -197,7 +218,7 @@ func (srv *Server) deleteSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	id, err := uuid.Parse(cookie.Value)
+	id, err := uuid.Parse(s.Value)
 	if err != nil {
 		srv.log.Warnln(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -270,6 +291,134 @@ func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
+	var head string
+	head, r.URL.Path = ShiftPath(r.URL.Path)
+	ID, err := strconv.Atoi(head)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	s, err := r.Cookie("session-id")
+	if err == http.ErrNoCookie {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	if err != nil {
+		srv.log.Warnln(err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	sID, err := uuid.Parse(s.Value)
+	if err != nil {
+		srv.log.Warnln(err.Error())
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	sess := srv.sm.Check(&session.SessionID{
+		ID: sID,
+	})
+	if sess == nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	userFromCookie, has, err := srv.users.GetByUsername(sess.Username)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if !has {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	userFromQuery, has, err := srv.users.GetByID(ID)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if !has {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if userFromCookie.ID != userFromQuery.ID {
+		w.WriteHeader(http.StatusNotAcceptable)
+		return
+	}
+
+	var updateReq requests.UserUpdate
+	defer r.Body.Close()
+	req, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = json.Unmarshal(req, &updateReq)
+	if err != nil {
+		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	response := validate.UpdateValidate(&updateReq)
+	if !response.ValidateSuccess {
+		err = responses.WriteResponse(w, http.StatusBadRequest, response)
+		if err != nil {
+			srv.log.Warnf("error: %s", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+	has = srv.users.Has(updateReq.Username)
+	if has {
+		response.ValidateSuccess = false
+		response.Error = responses.NewError("Username alredy exists")
+		err = responses.WriteResponse(w, http.StatusBadRequest, response)
+		if err != nil {
+			srv.log.Warnf("error: %s", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+	_, has, err = srv.users.GetByEmail(updateReq.Email)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if has {
+		response.ValidateSuccess = false
+		response.Error = responses.NewError("Email alredy exists")
+		err = responses.WriteResponse(w, http.StatusBadRequest, response)
+		if err != nil {
+			srv.log.Warnf("error: %s", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+	resUser := storage.User{
+		ID:       userFromQuery.ID,
+		Username: updateReq.Username,
+		Email:    updateReq.Email,
+		Password: userFromQuery.Password,
+	}
+	err = srv.users.Update(resUser)
+	if err != nil {
+		srv.log.Warnln("Can't update user into db", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	response.User = &resUser
+	err = responses.WriteResponse(w, http.StatusOK, response)
+	if err != nil {
+		srv.log.Warnf("error: %s", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
 func (srv *Server) getUsers(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var users []storage.User

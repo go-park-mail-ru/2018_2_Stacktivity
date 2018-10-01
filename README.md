@@ -1,3 +1,11 @@
 # 2018_2_Stacktivity
 
-http://128.68.165.22:3000
+Ссылка на проект: http://128.68.165.22:3000
+
+## Ментор: 
+Попонкин Дима https://github.com/PDmitryA
+
+## Команда: 
+Ломачёв Сергей https://github.com/Silvman
+Митраков Костя https://github.com/ConstaConst
+Соколов Влад https://github.com/Falcon22

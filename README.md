@@ -7,5 +7,7 @@
 
 ## Команда: 
 Ломачёв Сергей https://github.com/Silvman
+
 Митраков Костя https://github.com/ConstaConst
+
 Соколов Влад https://github.com/Falcon22

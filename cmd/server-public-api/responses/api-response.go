@@ -30,16 +30,18 @@ type ResponseForm struct {
 	Error            *Error        `json:"error,omitempty"`
 }
 
-func WriteResponse(w http.ResponseWriter, statusCode int, response interface{}) error {
+func WriteResponse(w http.ResponseWriter, statusCode int, response interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(statusCode)
 	resp, err := json.Marshal(response)
 	if err != nil {
-		return err
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 	_, err = w.Write(resp)
 	if err != nil {
-		return err
+		w.WriteHeader(http.StatusInternalServerError)
 	}
-	return nil
 }

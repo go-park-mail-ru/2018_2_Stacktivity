@@ -4,7 +4,6 @@ import (
 	"2018_2_Stacktivity/cmd/server-public-api/requests"
 	"2018_2_Stacktivity/cmd/server-public-api/responses"
 	"regexp"
-	"strings"
 )
 
 const (
@@ -59,14 +58,7 @@ func RegistrationValidate(req *requests.Registration) *responses.ResponseForm {
 			Error:   responses.NewError("Incorrect email"),
 		}
 	}
-	if !strings.EqualFold(req.Password1, req.Password2) {
-		resp.ValidateSuccess = false
-		resp.PasswordValidate = &responses.Validate{
-			Success: false,
-			Error:   responses.NewError("Password do not match"),
-		}
-	}
-	if len(req.Password1) == 0 || len(req.Password2) == 0 {
+	if len(req.Password) == 0 {
 		resp.ValidateSuccess = false
 		resp.PasswordValidate = &responses.Validate{
 			Success: false,

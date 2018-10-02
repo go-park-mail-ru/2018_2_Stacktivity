@@ -33,15 +33,10 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 	response := validate.RegistrationValidate(&registrationReq)
 	if !response.ValidateSuccess {
-		err = responses.WriteResponse(w, http.StatusBadRequest, response)
-		if err != nil {
-			srv.log.Warnf("error in /registration: %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		responses.WriteResponse(w, http.StatusBadRequest, response)
 		return
 	}
-	newUser := storage.NewUser(registrationReq.Username, registrationReq.Email, registrationReq.Password1)
+	newUser := storage.NewUser(registrationReq.Username, registrationReq.Email, registrationReq.Password)
 	existUser, existEmail, err := srv.users.CheckExists(newUser)
 	if err != nil {
 		srv.log.Warnln("Can't check exists users", err.Error())
@@ -57,11 +52,7 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		response.Error = responses.NewError("Email alredy exists")
 	}
 	if !response.ValidateSuccess {
-		err = responses.WriteResponse(w, http.StatusBadRequest, response)
-		if err != nil {
-			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		responses.WriteResponse(w, http.StatusBadRequest, response)
 		return
 	}
 	id, err := srv.users.Add(newUser)
@@ -88,27 +79,18 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		Expires: time.Now().Add(365 * 24 * time.Hour),
 	})
 
-	err = responses.WriteResponse(w, http.StatusOK, &responses.ResponseForm{
+	responses.WriteResponse(w, http.StatusOK, &responses.ResponseForm{
 		ValidateSuccess: true,
 		User:            &newUser,
 	})
-	if err != nil {
-		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
 }
 
 func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		err := responses.WriteResponse(w, http.StatusBadRequest, &responses.ResponseForm{
+		responses.WriteResponse(w, http.StatusBadRequest, &responses.ResponseForm{
 			ValidateSuccess: false,
 			Error:           responses.NewError("Bad method"),
 		})
-		if err != nil {
-			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-		}
 		return
 	}
 	var loginReq requests.Login
@@ -126,11 +108,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 	}
 	response := validate.LoginValidate(&loginReq)
 	if !response.ValidateSuccess {
-		if err = responses.WriteResponse(w, http.StatusBadRequest, response); err != nil {
-			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		responses.WriteResponse(w, http.StatusBadRequest, response)
 		return
 	}
 
@@ -140,11 +118,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 		response.Error = &responses.Error{
 			Message: "Incorrect login or password",
 		}
-		if err = responses.WriteResponse(w, http.StatusBadRequest, response); err != nil {
-			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		responses.WriteResponse(w, http.StatusBadRequest, response)
 		return
 	}
 	if !storage.CheckPassword(loginReq.Password, user.Password) {
@@ -152,11 +126,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 		response.Error = &responses.Error{
 			Message: "Incorrect login or password",
 		}
-		if err = responses.WriteResponse(w, http.StatusBadRequest, response); err != nil {
-			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		responses.WriteResponse(w, http.StatusBadRequest, response)
 		return
 	}
 	sess, err := srv.sm.Create(&session.Session{
@@ -175,10 +145,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 	response.User = &user
-	if err = responses.WriteResponse(w, http.StatusOK, response); err != nil {
-		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	responses.WriteResponse(w, http.StatusOK, response)
 }
 
 func (srv *Server) deleteSession(w http.ResponseWriter, r *http.Request) {
@@ -235,10 +202,7 @@ func (srv *Server) getSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	if err = responses.WriteResponse(w, http.StatusOK, user); err != nil {
-		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	responses.WriteResponse(w, http.StatusOK, user)
 }
 
 func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {
@@ -259,10 +223,7 @@ func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	if err = responses.WriteResponse(w, http.StatusOK, user); err != nil {
-		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	responses.WriteResponse(w, http.StatusOK, user)
 }
 
 func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
@@ -339,12 +300,7 @@ func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	response := validate.UpdateValidate(&updateReq)
 	if !response.ValidateSuccess {
-		err = responses.WriteResponse(w, http.StatusBadRequest, response)
-		if err != nil {
-			srv.log.Warnf("error: %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		responses.WriteResponse(w, http.StatusBadRequest, response)
 		return
 	}
 	_, has, err = srv.users.GetByEmail(updateReq.Email)
@@ -355,12 +311,7 @@ func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	if has {
 		response.ValidateSuccess = false
 		response.Error = responses.NewError("Email alredy exists")
-		err = responses.WriteResponse(w, http.StatusBadRequest, response)
-		if err != nil {
-			srv.log.Warnf("error: %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		responses.WriteResponse(w, http.StatusBadRequest, response)
 		return
 	}
 	resUser := storage.User{
@@ -375,20 +326,16 @@ func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 	response.User = &resUser
-	err = responses.WriteResponse(w, http.StatusOK, response)
-	if err != nil {
-		srv.log.Warnf("error: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	responses.WriteResponse(w, http.StatusOK, response)
 }
 
 func (srv *Server) getUsers(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var users []storage.User
 	pageNum := -1
-	page, ok := r.URL.Query()["page"]
-	if ok {
-		pageNum, err = strconv.Atoi(page[0])
+	page := r.URL.Query().Get("page")
+	if page != "" {
+		pageNum, err = strconv.Atoi(page)
 		if err != nil {
 			pageNum = -1
 		}
@@ -405,10 +352,5 @@ func (srv *Server) getUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sort.Sort(storage.Users(users))
-	err = responses.WriteResponse(w, http.StatusOK, users)
-	if err != nil {
-		srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	responses.WriteResponse(w, http.StatusOK, users)
 }

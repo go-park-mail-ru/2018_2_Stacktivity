@@ -276,9 +276,7 @@ definitions:
       email:
         type: string
         format: email
-      password1:
-        type: string
-      password2:
+      password:
         type: string
       avatar:
         type: string

@@ -6,14 +6,14 @@ type Login struct {
 }
 
 type Registration struct {
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Password1 string `json:"password1"`
-	Password2 string `json:"password2"`
-	Avatar    string `json:"avatar,omitempty"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Avatar   string `json:"avatar,omitempty"`
 }
 
 type UserUpdate struct {
 	Email    string `json:"email,omitempty"`
 	Password string `json:"password,omitempty"`
+	Avatar   string `json:"avatar,omitempty"`
 }

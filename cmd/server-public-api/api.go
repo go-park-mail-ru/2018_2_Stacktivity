@@ -17,18 +17,6 @@ import (
 )
 
 func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		err := responses.WriteResponse(w, http.StatusBadRequest, &responses.ResponseForm{
-			ValidateSuccess: false,
-			Error:           responses.NewError("Bad method"),
-		})
-		if err != nil {
-			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		return
-	}
-
 	var registrationReq requests.Registration
 	defer r.Body.Close()
 	req, err := ioutil.ReadAll(r.Body)
@@ -53,43 +41,29 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
 	newUser := storage.NewUser(registrationReq.Username, registrationReq.Email, registrationReq.Password1)
-	if srv.users.Has(newUser.Username) {
-		response.ValidateSuccess = false
-		response.Error = &responses.Error{
-			Message: "Username already exists",
-		}
-		err = responses.WriteResponse(w, http.StatusBadRequest, response)
-		if err != nil {
-			srv.log.Warnf("error in %d: %s", r.URL.Path, err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		return
-	}
-
-	_, hasEmail, err := srv.users.GetByEmail(newUser.Email)
+	existUser, existEmail, err := srv.users.CheckExists(newUser)
 	if err != nil {
-		srv.log.Warnf("error in %d: %s", r.URL.Path, err.Error())
+		srv.log.Warnln("Can't check exists users", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	if hasEmail {
+	if existUser {
 		response.ValidateSuccess = false
-		response.Error = &responses.Error{
-			Message: "Email already exists",
-		}
+		response.Error = responses.NewError("Username alredy exists")
+	}
+	if existEmail {
+		response.ValidateSuccess = false
+		response.Error = responses.NewError("Email alredy exists")
+	}
+	if !response.ValidateSuccess {
 		err = responses.WriteResponse(w, http.StatusBadRequest, response)
 		if err != nil {
-			srv.log.Warnf("error in %d: %s", r.URL.Path, err.Error())
+			srv.log.Warnf("error in %s: %s", r.URL.Path, err.Error())
 			w.WriteHeader(http.StatusInternalServerError)
-			return
 		}
 		return
 	}
-
 	id, err := srv.users.Add(newUser)
 	if err != nil {
 		srv.log.Warnln("Can't add user into db", err.Error())
@@ -373,18 +347,6 @@ func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	has = srv.users.Has(updateReq.Username)
-	if has {
-		response.ValidateSuccess = false
-		response.Error = responses.NewError("Username alredy exists")
-		err = responses.WriteResponse(w, http.StatusBadRequest, response)
-		if err != nil {
-			srv.log.Warnf("error: %s", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		return
-	}
 	_, has, err = srv.users.GetByEmail(updateReq.Email)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -403,9 +365,9 @@ func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	resUser := storage.User{
 		ID:       userFromQuery.ID,
-		Username: updateReq.Username,
+		Username: userFromQuery.Username,
 		Email:    updateReq.Email,
-		Password: userFromQuery.Password,
+		Password: updateReq.Password,
 	}
 	err = srv.users.Update(resUser)
 	if err != nil {
@@ -419,6 +381,7 @@ func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
+
 func (srv *Server) getUsers(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var users []storage.User

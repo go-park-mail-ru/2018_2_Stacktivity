@@ -82,13 +82,6 @@ func RegistrationValidate(req *requests.Registration) *responses.ResponseForm {
 func UpdateValidate(req *requests.UserUpdate) *responses.ResponseForm {
 	resp := new(responses.ResponseForm)
 	resp.ValidateSuccess = true
-	if len(req.Username) == 0 {
-		resp.ValidateSuccess = false
-		resp.UsernameValidate = &responses.Validate{
-			Success: false,
-			Error:   responses.NewError("Empty username"),
-		}
-	}
 	if len(req.Email) == 0 {
 		resp.ValidateSuccess = false
 		resp.EmailValidate = &responses.Validate{
@@ -101,6 +94,13 @@ func UpdateValidate(req *requests.UserUpdate) *responses.ResponseForm {
 		resp.PasswordValidate = &responses.Validate{
 			Success: false,
 			Error:   responses.NewError("Incorrect email"),
+		}
+	}
+	if len(req.Password) == 0 {
+		resp.ValidateSuccess = false
+		resp.PasswordValidate = &responses.Validate{
+			Success: false,
+			Error:   responses.NewError("Empty password"),
 		}
 	}
 	if !resp.ValidateSuccess {

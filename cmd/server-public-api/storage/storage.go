@@ -78,10 +78,10 @@ func (s *UserStorage) Add(user User) (uid int, err error) {
 	return uid, nil
 }
 
-var updateUser = `UPDATE users SET username = $2, email = $3, pass = $4 WHERE uID = $1;`
+var updateUser = `UPDATE users SET email = $2, pass = $3 WHERE uID = $1;`
 
 func (s *UserStorage) Update(user User) error {
-	_, err := s.stmts.updateUser.Exec(user.ID, user.Username, user.Email, createPassword(user.Password))
+	_, err := s.stmts.updateUser.Exec(user.ID, user.Email, createPassword(user.Password))
 	if err != nil {
 		err = errors.Wrap(err, "failed to query database")
 		return err
@@ -160,7 +160,7 @@ func (s *UserStorage) Has(username string) bool {
 	return find
 }
 
-var getAll = `SELECT uid, username, email, score FROM users;`
+var getAll = `SELECT uid, username, email, score FROM users ORDER BY score DESC;`
 
 func (s *UserStorage) GetAll() ([]User, error) {
 	users := make([]User, 0)
@@ -184,7 +184,7 @@ func (s *UserStorage) GetAll() ([]User, error) {
 	return users, nil
 }
 
-var getWithOptions = `SELECT uid, username, email, score FROM users LIMIT $1 OFFSET $2;`
+var getWithOptions = `SELECT uid, username, email, score FROM users ORDER BY score DESC LIMIT $1 OFFSET $2;`
 
 func (s *UserStorage) GetWithOptions(limit int, offset int) ([]User, error) {
 	users := make([]User, 0)
@@ -208,6 +208,22 @@ func (s *UserStorage) GetWithOptions(limit int, offset int) ([]User, error) {
 	return users, nil
 }
 
+func (s *UserStorage) CheckExists(user User) (userExist bool, emailExist bool, err error) {
+	emailExist, userExist, err = false, false, nil
+	_, hasEmail, err := s.GetByEmail(user.Email)
+	if err != nil {
+		err = errors.Wrap(err, "can't check exists email")
+		return false, false, err
+	}
+	if hasEmail {
+		emailExist = true
+	}
+	if s.Has(user.Username) {
+		userExist = true
+	}
+	return userExist, emailExist, err
+}
+
 type UserStorageI interface {
 	Add(User) (int, error)
 	Update(User) error
@@ -217,6 +233,7 @@ type UserStorageI interface {
 	Has(string) bool
 	GetAll() ([]User, error)
 	GetWithOptions(int, int) ([]User, error)
+	CheckExists(User) (bool, bool, error)
 	Prepare() error
 }
 
@@ -245,7 +262,7 @@ func (u Users) Len() int {
 }
 
 func (u Users) Less(i, j int) bool {
-	return u[i].Score < u[j].Score
+	return u[i].Score > u[j].Score
 }
 
 func (u Users) Swap(i, j int) {

@@ -3,7 +3,7 @@ swagger: '2.0'
 info:
   title: forum
   description: |
-    Документация для учебного проекта 
+    Документация для учебного проекта
     Технопарке Mail.ru (https://park.mail.ru).
   version: "0.1.0"
 schemes:
@@ -29,8 +29,8 @@ paths:
         401:
           description: |
             Пользователь не авторизован.
-        
-            
+
+
     post:
       summary: Авторизация
       description: |
@@ -56,7 +56,7 @@ paths:
         500:
           description: |
             Ошибка на стороне сервера.
-    
+
     delete:
       summary: Выход
       description: |
@@ -73,7 +73,7 @@ paths:
       summary: Список пользователей
       description: |
         Получение cтраницы таблицы лидеров.
-      parameters: 
+      parameters:
         - in: query
           name: page
           type: integer
@@ -94,7 +94,7 @@ paths:
         500:
           description: |
             Ошиюка на стороне сервера.
-    
+
     post:
       summary: Регистрация нового пользователя
       description: |
@@ -120,7 +120,7 @@ paths:
         500:
           description: |
             Ошибка на стороне сервера.
-      
+
   /user/{id}:
     get:
       summary: Информация о пользователе
@@ -149,12 +149,13 @@ paths:
             Ошибка на стороне сервера.
     put:
       summary: Обновить данные пользователя
-      parameters: 
+      parameters:
       - in: path
         name: id
         type: integer
         required: true
-      - in: body
+      - name: user
+        in: body
         description: Данные регистрации.
         required: true
         schema:
@@ -177,7 +178,7 @@ paths:
         500:
           description: |
             Ошибка на стороне сервера.
-            
+
 definitions:
   Error:
     type: object
@@ -214,7 +215,7 @@ definitions:
         format: url
         example: avatar.jpg
         description: URL к аватару пользователя.
-  
+
   User:
     description: |
       Информация о пользователе.
@@ -264,7 +265,7 @@ definitions:
         $ref: '#/definitions/Error'
     required:
     - success
-    
+
   RegistrationRequest:
     type: object
     description: |
@@ -287,7 +288,7 @@ definitions:
     - email
     - password1
     - password2
-    
+
   LoginRequest:
     type: object
     description: |
@@ -300,7 +301,7 @@ definitions:
     required:
     - username
     - password
-    
+
   RegistrationResponse:
     type: object
     description: |
@@ -311,17 +312,17 @@ definitions:
         description: Регистрация прошла успешно.
       user:
         $ref: '#/definitions/User'
-      usernameValidate: 
+      usernameValidate:
         $ref: '#/definitions/Validate'
       emailValidate:
         $ref: '#/definitions/Validate'
-      passwordValidate: 
+      passwordValidate:
         $ref: '#/definitions/Validate'
       error:
         $ref: '#/definitions/Error'
     required:
     - ValidateSuccess
-        
+
   LoginResponse:
     type: object
     description: |
@@ -332,15 +333,15 @@ definitions:
         description: Авторизация прошла успешно.
       user:
         $ref: '#/definitions/User'
-      usernameValidate: 
+      usernameValidate:
         $ref: '#/definitions/Validate'
-      passwordValidate: 
+      passwordValidate:
         $ref: '#/definitions/Validate'
       error:
         $ref: '#/definitions/Error'
     required:
     - ValidateSuccess
-    
+
   UpdateResponse:
     type: object
     description: |
@@ -351,12 +352,11 @@ definitions:
         description: Обновление прошло успешно.
       user:
         $ref: '#/definitions/User'
-      usernameValidate: 
+      usernameValidate:
         $ref: '#/definitions/Validate'
-      emailValidate: 
+      emailValidate:
         $ref: '#/definitions/Validate'
       error:
         $ref: '#/definitions/Error'
     required:
     - ValidateSuccess
-      

@@ -32,7 +32,7 @@ func main() {
 	flag.Parse()
 	logger := log.New()
 	logger.SetLevel(log.InfoLevel)
-	logger.SetOutput(os.Stdout) // TODO write log in file
+	logger.SetOutput(os.Stdout) // TODO write logs to file
 
 	db, err := sql.Open("postgres", config.DB)
 	if err != nil {
@@ -55,7 +55,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
 }
 
 func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -77,6 +76,9 @@ func (srv *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		srv.RouteUser(w, r)
 	case "session":
 		srv.RouteSession(w, r)
+	case "docs":
+		w.Header().Del("Content-Type")
+		http.FileServer(http.Dir(config.PathToOpenAPI)).ServeHTTP(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}

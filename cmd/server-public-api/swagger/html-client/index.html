@@ -1,0 +1,799 @@
+<!doctype html>
+<html>
+  <head>
+    <title>forum</title>
+    <style type="text/css">
+      body {
+	font-family: Trebuchet MS, sans-serif;
+	font-size: 15px;
+	color: #444;
+	margin-right: 24px;
+}
+
+h1	{
+	font-size: 25px;
+}
+h2	{
+	font-size: 20px;
+}
+h3	{
+	font-size: 16px;
+	font-weight: bold;
+}
+hr	{
+	height: 1px;
+	border: 0;
+	color: #ddd;
+	background-color: #ddd;
+}
+
+.app-desc {
+  clear: both;
+  margin-left: 20px;
+}
+.param-name {
+  width: 100%;
+}
+.license-info {
+  margin-left: 20px;
+}
+
+.license-url {
+  margin-left: 20px;
+}
+
+.model {
+  margin: 0 0 0px 20px;
+}
+
+.method {
+  margin-left: 20px;
+}
+
+.method-notes	{
+	margin: 10px 0 20px 0;
+	font-size: 90%;
+	color: #555;
+}
+
+pre {
+  padding: 10px;
+  margin-bottom: 2px;
+}
+
+.http-method {
+ text-transform: uppercase;
+}
+
+pre.get {
+  background-color: #0f6ab4;
+}
+
+pre.post {
+  background-color: #10a54a;
+}
+
+pre.put {
+  background-color: #c5862b;
+}
+
+pre.delete {
+  background-color: #a41e22;
+}
+
+.huge	{
+	color: #fff;
+}
+
+pre.example {
+  background-color: #f3f3f3;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+code {
+  white-space: pre;
+}
+
+.nickname {
+  font-weight: bold;
+}
+
+.method-path {
+  font-size: 1.5em;
+  background-color: #0f6ab4;
+}
+
+.up {
+  float:right;
+}
+
+.parameter {
+  width: 500px;
+}
+
+.param {
+  width: 500px;
+  padding: 10px 0 0 20px;
+  font-weight: bold;
+}
+
+.param-desc {
+  width: 700px;
+  padding: 0 0 0 20px;
+  color: #777;
+}
+
+.param-type {
+  font-style: italic;
+}
+
+.param-enum-header {
+width: 700px;
+padding: 0 0 0 60px;
+color: #777;
+font-weight: bold;
+}
+
+.param-enum {
+width: 700px;
+padding: 0 0 0 80px;
+color: #777;
+font-style: italic;
+}
+
+.field-label {
+  padding: 0;
+  margin: 0;
+  clear: both;
+}
+
+.field-items	{
+	padding: 0 0 15px 0;
+	margin-bottom: 15px;
+}
+
+.return-type {
+  clear: both;
+  padding-bottom: 10px;
+}
+
+.param-header {
+  font-weight: bold;
+}
+
+.method-tags {
+  text-align: right;
+}
+
+.method-tag {
+  background: none repeat scroll 0% 0% #24A600;
+  border-radius: 3px;
+  padding: 2px 10px;
+  margin: 2px;
+  color: #FFF;
+  display: inline-block;
+  text-decoration: none;
+}
+
+    </style>
+  </head>
+  <body>
+  <h1>forum</h1>
+    <div class="app-desc">Документация для учебного проекта
+Технопарке Mail.ru (https://park.mail.ru).</div>
+    <div class="app-desc">More information: <a href="https://helloreverb.com">https://helloreverb.com</a></div>
+    <div class="app-desc">Contact Info: <a href="hello@helloreverb.com">hello@helloreverb.com</a></div>
+    <div class="app-desc">Version: 0.1.0</div>
+    <div class="app-desc">BasePath:/api</div>
+    <div class="license-info">All rights reserved</div>
+    <div class="license-url">http://apache.org/licenses/LICENSE-2.0.html</div>
+  <h2>Access</h2>
+
+  <h2><a name="__Methods">Methods</a></h2>
+  [ Jump to <a href="#__Models">Models</a> ]
+
+  <h3>Table of Contents </h3>
+  <div class="method-summary"></div>
+  <h4><a href="#Default">Default</a></h4>
+  <ul>
+  <li><a href="#getScoreboard"><code><span class="http-method">get</span> /user</code></a></li>
+  <li><a href="#sessionDelete"><code><span class="http-method">delete</span> /session</code></a></li>
+  <li><a href="#sessionGet"><code><span class="http-method">get</span> /session</code></a></li>
+  <li><a href="#sessionPost"><code><span class="http-method">post</span> /session</code></a></li>
+  <li><a href="#userIdGet"><code><span class="http-method">get</span> /user/{id}</code></a></li>
+  <li><a href="#userIdPut"><code><span class="http-method">put</span> /user/{id}</code></a></li>
+  <li><a href="#userPost"><code><span class="http-method">post</span> /user</code></a></li>
+  </ul>
+
+  <h1><a name="Default">Default</a></h1>
+  <div class="method"><a name="getScoreboard"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user</code></pre></div>
+    <div class="method-summary">Список пользователей (<span class="nickname">getScoreboard</span>)</div>
+    <div class="method-notes">Получение cтраницы таблицы лидеров.</div>
+
+
+
+
+
+    <h3 class="field-label">Query parameters</h3>
+    <div class="field-items">
+      <div class="param">page (optional)</div>
+
+      <div class="param-desc"><span class="param-type">Query Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      array[<a href="#User">User</a>]
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>[ {
+  "score" : 6,
+  "id" : 0,
+  "avatar" : "avatar.jpg",
+  "email" : "captaina@blackpearl.sea",
+  "username" : "j.sparrow"
+}, {
+  "score" : 6,
+  "id" : 0,
+  "avatar" : "avatar.jpg",
+  "email" : "captaina@blackpearl.sea",
+  "username" : "j.sparrow"
+} ]</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Информация о пользователе.
+        
+    <h4 class="field-label">400</h4>
+    Некорректный запрос.
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Ошиюка на стороне сервера.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="sessionDelete"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="delete"><code class="huge"><span class="http-method">delete</span> /session</code></pre></div>
+    <div class="method-summary">Выход (<span class="nickname">sessionDelete</span>)</div>
+    <div class="method-notes">Выход с сайта.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Выход прошел успешно, session-id удален.
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Ошибка на стороне сервера.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="sessionGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /session</code></pre></div>
+    <div class="method-summary">Получение информации о текущем пользователе cookie (<span class="nickname">sessionGet</span>)</div>
+    <div class="method-notes">Получение информации о пользователе, session-id которого лежит в cookie.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#User">User</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "score" : 6,
+  "id" : 0,
+  "avatar" : "avatar.jpg",
+  "email" : "captaina@blackpearl.sea",
+  "username" : "j.sparrow"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Информация о пользователе.
+        <a href="#User">User</a>
+    <h4 class="field-label">401</h4>
+    Пользователь не авторизован.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="sessionPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /session</code></pre></div>
+    <div class="method-summary">Авторизация (<span class="nickname">sessionPost</span>)</div>
+    <div class="method-notes">Авторизация на сайте.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">user <a href="#LoginRequest">LoginRequest</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash; Данные авторизации. </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#LoginResponse">LoginResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "passwordValidate" : {
+    "success" : true,
+    "error" : {
+      "message" : "Can't find user with id #42\n"
+    }
+  },
+  "usernameValidate" : {
+    "success" : true,
+    "error" : {
+      "message" : "Can't find user with id #42\n"
+    }
+  },
+  "error" : {
+    "message" : "Can't find user with id #42\n"
+  },
+  "user" : {
+    "score" : 6,
+    "id" : 0,
+    "avatar" : "avatar.jpg",
+    "email" : "captaina@blackpearl.sea",
+    "username" : "j.sparrow"
+  },
+  "ValidateSuccess" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Авторизация прошла успешно, в cookie записан session-id.
+        <a href="#LoginResponse">LoginResponse</a>
+    <h4 class="field-label">400</h4>
+    Некорректный запрос. Авторизация прошла не успешно. В полях валидации записана ошибка.
+        <a href="#LoginResponse">LoginResponse</a>
+    <h4 class="field-label">500</h4>
+    Ошибка на стороне сервера.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="userIdGet"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">get</span> /user/{id}</code></pre></div>
+    <div class="method-summary">Информация о пользователе (<span class="nickname">userIdGet</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#User">User</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "score" : 6,
+  "id" : 0,
+  "avatar" : "avatar.jpg",
+  "email" : "captaina@blackpearl.sea",
+  "username" : "j.sparrow"
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Запрос выполнен успешно.
+        <a href="#User">User</a>
+    <h4 class="field-label">400</h4>
+    Недопустимый запрос.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Не авторизован.
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Пользователь отсутсвует в системе.
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Ошибка на стороне сервера.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="userIdPut"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">put</span> /user/{id}</code></pre></div>
+    <div class="method-summary">Обновить данные пользователя (<span class="nickname">userIdPut</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+      <div class="param">id (required)</div>
+
+      <div class="param-desc"><span class="param-type">Path Parameter</span> &mdash;  </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">user <a href="#UserUpdate">UserUpdate</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash; Данные регистрации. </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#UpdateResponse">UpdateResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "usernameValidate" : {
+    "success" : true,
+    "error" : {
+      "message" : "Can't find user with id #42\n"
+    }
+  },
+  "emailValidate" : {
+    "success" : true,
+    "error" : {
+      "message" : "Can't find user with id #42\n"
+    }
+  },
+  "error" : {
+    "message" : "Can't find user with id #42\n"
+  },
+  "user" : {
+    "score" : 6,
+    "id" : 0,
+    "avatar" : "avatar.jpg",
+    "email" : "captaina@blackpearl.sea",
+    "username" : "j.sparrow"
+  },
+  "ValidateSuccess" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">200</h4>
+    Данные пользователя успешно обновлены.
+        <a href="#UpdateResponse">UpdateResponse</a>
+    <h4 class="field-label">400</h4>
+    Недопустимый запрос.
+        <a href="#"></a>
+    <h4 class="field-label">401</h4>
+    Не авторизован.
+        <a href="#"></a>
+    <h4 class="field-label">404</h4>
+    Пользователь отсутсвует в системе.
+        <a href="#"></a>
+    <h4 class="field-label">500</h4>
+    Ошибка на стороне сервера.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+  <div class="method"><a name="userPost"/>
+    <div class="method-path">
+    <a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">post</span> /user</code></pre></div>
+    <div class="method-summary">Регистрация нового пользователя (<span class="nickname">userPost</span>)</div>
+    <div class="method-notes">Регистрация на сайте.</div>
+
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="heaader">Content-Type</span> request header:
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+      <div class="param">user <a href="#RegistrationRequest">RegistrationRequest</a> (required)</div>
+
+      <div class="param-desc"><span class="param-type">Body Parameter</span> &mdash; Данные регистрации. </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+    <h3 class="field-label">Return type</h3>
+    <div class="return-type">
+      <a href="#RegistrationResponse">RegistrationResponse</a>
+      
+    </div>
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+    <h3 class="field-label">Example data</h3>
+    <div class="example-data-content-type">Content-Type: application/json</div>
+    <pre class="example"><code>{
+  "passwordValidate" : {
+    "success" : true,
+    "error" : {
+      "message" : "Can't find user with id #42\n"
+    }
+  },
+  "usernameValidate" : {
+    "success" : true,
+    "error" : {
+      "message" : "Can't find user with id #42\n"
+    }
+  },
+  "emailValidate" : {
+    "success" : true,
+    "error" : {
+      "message" : "Can't find user with id #42\n"
+    }
+  },
+  "error" : {
+    "message" : "Can't find user with id #42\n"
+  },
+  "user" : {
+    "score" : 6,
+    "id" : 0,
+    "avatar" : "avatar.jpg",
+    "email" : "captaina@blackpearl.sea",
+    "username" : "j.sparrow"
+  },
+  "ValidateSuccess" : true
+}</code></pre>
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="heaader">Content-Type</span> response header.
+    <ul>
+      <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">201</h4>
+    Регистрация прошла успешно, в cookie записан session-id.
+        <a href="#RegistrationResponse">RegistrationResponse</a>
+    <h4 class="field-label">400</h4>
+    Некорректный запрос. Регистрация прошла не успешно. В полях валидации записана ошибка.
+        <a href="#RegistrationResponse">RegistrationResponse</a>
+    <h4 class="field-label">500</h4>
+    Ошибка на стороне сервера.
+        <a href="#"></a>
+  </div> <!-- method -->
+  <hr/>
+
+  <h2><a name="__Models">Models</a></h2>
+  [ Jump to <a href="#__Methods">Methods</a> ]
+
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#Error"><code>Error</code> - </a></li>
+    <li><a href="#LoginRequest"><code>LoginRequest</code> - </a></li>
+    <li><a href="#LoginResponse"><code>LoginResponse</code> - </a></li>
+    <li><a href="#RegistrationRequest"><code>RegistrationRequest</code> - </a></li>
+    <li><a href="#RegistrationResponse"><code>RegistrationResponse</code> - </a></li>
+    <li><a href="#UpdateResponse"><code>UpdateResponse</code> - </a></li>
+    <li><a href="#User"><code>User</code> - </a></li>
+    <li><a href="#UserUpdate"><code>UserUpdate</code> - </a></li>
+    <li><a href="#Validate"><code>Validate</code> - </a></li>
+  </ol>
+
+  <div class="model">
+    <h3><a name="Error"><code>Error</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">message (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Текстовое описание ошибки.
+В процессе проверки API никаких проверок на содерижимое данного описание не делается. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="LoginRequest"><code>LoginRequest</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Форма логина.</div>
+    <div class="field-items">
+      <div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">password </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="LoginResponse"><code>LoginResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Ответ от логина.</div>
+    <div class="field-items">
+      <div class="param">ValidateSuccess </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Авторизация прошла успешно. </div>
+<div class="param">user (optional)</div><div class="param-desc"><span class="param-type"><a href="#User">User</a></span>  </div>
+<div class="param">usernameValidate (optional)</div><div class="param-desc"><span class="param-type"><a href="#Validate">Validate</a></span>  </div>
+<div class="param">passwordValidate (optional)</div><div class="param-desc"><span class="param-type"><a href="#Validate">Validate</a></span>  </div>
+<div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#Error">Error</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RegistrationRequest"><code>RegistrationRequest</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Форма регистрации.</div>
+    <div class="field-items">
+      <div class="param">username </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  format: email</div>
+<div class="param">password1 </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">password2 </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+<div class="param">avatar (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  format: url</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="RegistrationResponse"><code>RegistrationResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Ответ от регистрации.</div>
+    <div class="field-items">
+      <div class="param">ValidateSuccess </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Регистрация прошла успешно. </div>
+<div class="param">user (optional)</div><div class="param-desc"><span class="param-type"><a href="#User">User</a></span>  </div>
+<div class="param">usernameValidate (optional)</div><div class="param-desc"><span class="param-type"><a href="#Validate">Validate</a></span>  </div>
+<div class="param">emailValidate (optional)</div><div class="param-desc"><span class="param-type"><a href="#Validate">Validate</a></span>  </div>
+<div class="param">passwordValidate (optional)</div><div class="param-desc"><span class="param-type"><a href="#Validate">Validate</a></span>  </div>
+<div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#Error">Error</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="UpdateResponse"><code>UpdateResponse</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Ответ обновления аккаунта.</div>
+    <div class="field-items">
+      <div class="param">ValidateSuccess </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Обновление прошло успешно. </div>
+<div class="param">user (optional)</div><div class="param-desc"><span class="param-type"><a href="#User">User</a></span>  </div>
+<div class="param">usernameValidate (optional)</div><div class="param-desc"><span class="param-type"><a href="#Validate">Validate</a></span>  </div>
+<div class="param">emailValidate (optional)</div><div class="param-desc"><span class="param-type"><a href="#Validate">Validate</a></span>  </div>
+<div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#Error">Error</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="User"><code>User</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Информация о пользователе.</div>
+    <div class="field-items">
+      <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> ID пользователя (уникальное поле).
+Данное поле допускает только цифры. format: identity</div>
+<div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Имя пользователя (уникальное поле).
+Данное поле допускает только латиницу, цифры и знак подчеркивания.
+Сравнение имени регистронезависимо. format: identity</div>
+<div class="param">email </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Почтовый адрес пользователя (уникальное поле). format: email</div>
+<div class="param">avatar (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> URL к аватару пользователя. format: url</div>
+<div class="param">score (optional)</div><div class="param-desc"><span class="param-type"><a href="#integer">Integer</a></span> Количество игровых очков пользователя. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="UserUpdate"><code>UserUpdate</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Информация о пользователе.</div>
+    <div class="field-items">
+      <div class="param">username (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Имя пользователя (уникальное поле).
+Данное поле допускает только латиницу, цифры и знак подчеркивания.
+Сравнение имени регистронезависимо. format: identity</div>
+<div class="param">email (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Почтовый адрес пользователя (уникальное поле). format: email</div>
+<div class="param">avatar (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> URL к аватару пользователя. format: url</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Validate"><code>Validate</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Валидация сервера.</div>
+    <div class="field-items">
+      <div class="param">success </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Валидация прошла успешно. </div>
+<div class="param">error (optional)</div><div class="param-desc"><span class="param-type"><a href="#Error">Error</a></span>  </div>
+    </div>  <!-- field-items -->
+  </div>
+  </body>
+</html>

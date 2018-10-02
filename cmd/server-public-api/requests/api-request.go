@@ -14,7 +14,6 @@ type Registration struct {
 }
 
 type UserUpdate struct {
-	Username string `json:"username,omitempty"`
 	Email    string `json:"email,omitempty"`
-	Avatar   string `json:"avatar,omitempty"`
+	Password string `json:"password,omitempty"`
 }

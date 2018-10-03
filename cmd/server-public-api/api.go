@@ -86,13 +86,6 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		responses.WriteResponse(w, http.StatusBadRequest, &responses.ResponseForm{
-			ValidateSuccess: false,
-			Error:           responses.NewError("Bad method"),
-		})
-		return
-	}
 	var loginReq requests.Login
 	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)

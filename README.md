@@ -1,15 +1,16 @@
 # 2018_2_Stacktivity
+Задеплоенный проект: <a href="http://128.68.165.22:3000">тык</a>
 
-Ссылка на проект: http://128.68.165.22:3000
+<a href="http://128.68.165.22:3000/docs">OpenAPI</a> 
 
-OpenAPI: http://128.68.165.22:3000/docs
+<a href="https://github.com/frontend-park-mail-ru/2018_2_Stacktivity">Репа фронта тут</a>
 
 ## Ментор: 
-Попонкин Дима https://github.com/PDmitryA
+<a href="https://github.com/PDmitryA">Попонкин Дима</a>
 
 ## Команда: 
-Ломачёв Сергей https://github.com/Silvman
+<a href="https://github.com/Silvman">Ломачёв Сергей</a> 
 
-Митраков Костя https://github.com/ConstaConst
+<a href="https://github.com/ConstaConst">Митраков Костя</a> 
 
-Соколов Влад https://github.com/Falcon22
+<a href="https://github.com/Falcon22">Соколов Влад</a> 

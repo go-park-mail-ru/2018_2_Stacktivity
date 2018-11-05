@@ -80,8 +80,27 @@ func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
-	// TODO add updateUser
-	w.WriteHeader(http.StatusOK)
+	if !getIsAuth(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	var updateReq models.UserUpdate
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		srv.log.Warnln("can't read request from body", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if err := json.Unmarshal(body, &updateReq); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	updatedUser, err := srv.users.UpdateUser(getUserID(r), updateReq)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	responses.Write(w, http.StatusOK, updatedUser)
 }
 
 func (srv *Server) getUsers(w http.ResponseWriter, r *http.Request) {

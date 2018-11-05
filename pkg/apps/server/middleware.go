@@ -5,6 +5,9 @@ import (
 	"context"
 	"net/http"
 
+	"2018_2_Stacktivity/models"
+	"log"
+
 	"github.com/google/uuid"
 )
 
@@ -63,6 +66,32 @@ func (srv *Server) logginigMiddleware(next http.Handler) http.Handler {
 		})
 }
 
+func (srv *Server) checkAuthorization(next http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			log.Println("checkAuthorization")
+			if !getIsAuth(r) {
+				log.Println("user is not auth in game")
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			id := getUserID(r)
+			user, has, err := srv.users.GetByID(id)
+			if err != nil {
+				log.Println("can't get user by ID: ", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			if !has {
+				log.Printf("user not found by ID: %d\n", id)
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			ctx := context.WithValue(r.Context(), "user", user)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+}
+
 func getIsAuth(r *http.Request) bool {
 	return r.Context().Value("isAuth").(bool)
 }
@@ -73,4 +102,8 @@ func getUserID(r *http.Request) int {
 
 func getSessionID(r *http.Request) uuid.UUID {
 	return r.Context().Value("sessionID").(uuid.UUID)
+}
+
+func getUser(r *http.Request) models.User {
+	return r.Context().Value("user").(models.User)
 }

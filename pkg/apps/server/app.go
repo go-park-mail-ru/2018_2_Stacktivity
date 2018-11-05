@@ -2,16 +2,16 @@ package server
 
 import (
 	"2018_2_Stacktivity/models"
+	"2018_2_Stacktivity/pkg/apps/game"
 	"2018_2_Stacktivity/session"
 	"2018_2_Stacktivity/storage"
+	"2018_2_Stacktivity/storage/migrations"
 	"context"
 	"flag"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-
-	"2018_2_Stacktivity/storage/migrations"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -22,6 +22,7 @@ type Server struct {
 	httpSrv  *http.Server
 	sm       session.SessionManagerI
 	users    storage.UserStorageI
+	game     *game.Game
 	validate *validator.Validate
 	log      *log.Logger
 }
@@ -36,6 +37,7 @@ func newServer(logger *log.Logger) *Server {
 		sm:       session.NewSessionManager(),
 		users:    storage.GetUserStorage(),
 		validate: models.InitValidator(),
+		game:     game.NewGame(logger),
 		log:      logger,
 	}
 }
@@ -71,6 +73,13 @@ func (srv *Server) createRoute() {
 	sessionRouter.HandleFunc("", srv.getSession).Methods(http.MethodGet)
 	sessionRouter.HandleFunc("", srv.deleteSession).Methods(http.MethodDelete)
 	srv.httpSrv.Handler = r
+
+	gameRouter := r.PathPrefix("/game").Subrouter()
+	// Create/Get/Delete Game
+	gameRouter.Use(srv.checkAuthorization)
+	gameRouter.HandleFunc("/singleplayer", CreateRoom)
+	gameRouter.HandleFunc("/multiplayer", srv.CreatePlayer)
+	gameRouter.HandleFunc("/room/{id:[0-9]+}", GetRoom)
 }
 
 func StartApp() {
@@ -86,6 +95,7 @@ func StartApp() {
 	migrations.InitMigration()
 	srv := newServer(logger)
 	srv.createRoute()
+	srv.game.Start()
 	go func() {
 		logger.Infof("Starting server on %s", config.Port)
 		if err := srv.httpSrv.ListenAndServe(); err != nil {

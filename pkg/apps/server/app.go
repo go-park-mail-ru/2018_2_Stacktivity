@@ -34,7 +34,7 @@ func newServer(logger *log.Logger) *Server {
 			WriteTimeout: config.WriteTimeout,
 			ReadTimeout:  config.ReadTimeout,
 		},
-		sm:       session.NewSessionManager(),
+		sm:       session.NewSessionManager(logger, *session.GetInstanse()),
 		users:    storage.GetUserStorage(),
 		validate: models.InitValidator(),
 		game:     game.NewGame(logger),
@@ -91,6 +91,12 @@ func StartApp() {
 	err := storage.InitDB(config.DB)
 	if err != nil {
 		log.Warnln("can't init database", err.Error())
+		return
+	}
+	err = session.InitRedis(config.RedisAddr)
+	if err != nil {
+		log.Warnln("can't init redis", err.Error())
+		return
 	}
 	migrations.InitMigration()
 	srv := newServer(logger)

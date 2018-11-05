@@ -1,10 +1,12 @@
 package session
 
 import (
-	"sync"
+	"encoding/json"
 
+	"github.com/garyburd/redigo/redis"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type Session struct {
@@ -16,8 +18,8 @@ type SessionID struct {
 }
 
 type SessionManager struct {
-	mu       sync.RWMutex
-	sessions map[SessionID]*Session
+	sessions redis.Conn
+	log      *log.Logger
 }
 
 type SessionManagerI interface {
@@ -26,35 +28,51 @@ type SessionManagerI interface {
 	Delete(*SessionID)
 }
 
-func NewSessionManager() *SessionManager {
+func NewSessionManager(logger *log.Logger, conn redis.Conn) *SessionManager {
 	return &SessionManager{
-		mu: sync.RWMutex{},
-		// TODO save sessions into key-value storage
-		sessions: map[SessionID]*Session{},
+		sessions: conn,
+		log:      logger,
 	}
 }
 
 func (sm *SessionManager) Create(in *Session) (*SessionID, error) {
-	sm.mu.Lock()
 	ID, err := uuid.NewUUID()
 	if err != nil {
 		return nil, errors.Wrap(err, "Can't create session ID")
 	}
 	sessionID := SessionID{ID}
-	sm.mu.Unlock()
-	sm.sessions[sessionID] = in
+	dataSerialized, _ := json.Marshal(in)
+	mkey := "sessions:" + sessionID.ID.String()
+	result, err := redis.String(sm.sessions.Do("SET", mkey, dataSerialized, "EX", 86400))
+	if err != nil {
+		return nil, errors.Wrap(err, "can't insert valuer into redis")
+	}
+	if result != "OK" {
+		return nil, errors.New("result from redis is not OK: " + result)
+	}
 	return &sessionID, nil
 }
 
 func (sm *SessionManager) Check(in *SessionID) (bool, *Session) {
-	sm.mu.RLock()
-	session := sm.sessions[*in]
-	sm.mu.RUnlock()
+	mkey := "sessions:" + in.ID.String()
+	data, err := redis.Bytes(sm.sessions.Do("GET", mkey))
+	if err != nil {
+		sm.log.Println("can't get data:", err)
+		return false, nil
+	}
+	session := &Session{}
+	err = json.Unmarshal(data, session)
+	if err != nil {
+		sm.log.Println("can't unpack session data:", err)
+		return false, nil
+	}
 	return session != nil, session
 }
 
 func (sm *SessionManager) Delete(in *SessionID) {
-	sm.mu.Lock()
-	delete(sm.sessions, *in)
-	sm.mu.Unlock()
+	mkey := "sessions:" + in.ID.String()
+	_, err := redis.Int(sm.sessions.Do("DEL", mkey))
+	if err != nil {
+		sm.log.Println("redis error:", err)
+	}
 }

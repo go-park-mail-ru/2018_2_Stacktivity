@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS "user"
   email    VARCHAR(30)  NOT NULL,
   pass     VARCHAR(120) NOT NULL,
   avatar   VARCHAR(120) DEFAULT NULL,
-  level    INTEGER      DEFAULT 0,
   score    INTEGER      DEFAULT 0
 );
 

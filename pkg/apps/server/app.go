@@ -58,20 +58,20 @@ func (srv *Server) createRoute() {
 		Queries("limit", "{limit:[0-9]*?}", "offset", "{offset:[0-9]*?}")
 
 	// Create/Get User
-	userRouter.HandleFunc("", srv.createUser).Methods(http.MethodPost)
+	userRouter.HandleFunc("", srv.createUser).Methods(http.MethodPost, http.MethodOptions)
 	userRouter.HandleFunc("/{id:[0-9]+}", srv.getUser).Methods(http.MethodGet)
 
 	// UpdateUser
-	userRouter.HandleFunc("/{id:[0-9]+}", srv.updateUser).Methods(http.MethodPatch)
+	userRouter.HandleFunc("/{id:[0-9]+}", srv.updateUser).Methods(http.MethodPatch, http.MethodOptions)
 
 	// GetAllUsers
 	userRouter.HandleFunc("", srv.getUsers).Methods(http.MethodGet)
 
 	sessionRouter := r.PathPrefix("/session").Subrouter()
 	// Create/Get/Delete Session
-	sessionRouter.HandleFunc("", srv.createSession).Methods(http.MethodPost)
+	sessionRouter.HandleFunc("", srv.createSession).Methods(http.MethodPost, http.MethodOptions)
 	sessionRouter.HandleFunc("", srv.getSession).Methods(http.MethodGet)
-	sessionRouter.HandleFunc("", srv.deleteSession).Methods(http.MethodDelete)
+	sessionRouter.HandleFunc("", srv.deleteSession).Methods(http.MethodDelete, http.MethodOptions)
 	srv.httpSrv.Handler = r
 
 	gameRouter := r.PathPrefix("/game").Subrouter()

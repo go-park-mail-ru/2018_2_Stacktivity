@@ -4,6 +4,8 @@ import (
 	"2018_2_Stacktivity/models"
 	"database/sql"
 
+	"log"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -97,6 +99,7 @@ var getByUsername = `SELECT * FROM "user" WHERE username = $1 LIMIT 1;`
 
 func (s *UserStorage) GetByUsername(username string) (user models.User, has bool, err error) {
 	user = models.User{}
+	log.Println(username)
 	if err = s.DB.Get(&user, getByUsername, username); err != nil {
 		if err == sql.ErrNoRows {
 			return user, false, nil

@@ -1,4 +1,5 @@
-CREATE TABLE IF NOT EXISTS users
+-- auto-generated definition
+CREATE TABLE IF NOT EXISTS "user"
 (
   uid      SERIAL       NOT NULL
     CONSTRAINT users_pkey
@@ -6,16 +7,17 @@ CREATE TABLE IF NOT EXISTS users
   username VARCHAR(30)  NOT NULL,
   email    VARCHAR(30)  NOT NULL,
   pass     VARCHAR(120) NOT NULL,
-  avatar   VARCHAR(120) NOT NULL,
-  score    INTEGER DEFAULT 0,
-  level    INTEGER DEFAULT 0
+  avatar   VARCHAR(120) DEFAULT NULL,
+  level    INTEGER      DEFAULT 0,
+  score    INTEGER      DEFAULT 0
 );
 
 CREATE UNIQUE INDEX users_uid_uindex
-  ON users (uid);
+  ON "user" (uid);
 
 CREATE UNIQUE INDEX users_username_uindex
-  ON users (username);
+  ON "user" (username);
 
 CREATE UNIQUE INDEX users_email_uindex
-  ON users (email);
+  ON "user" (email);
+

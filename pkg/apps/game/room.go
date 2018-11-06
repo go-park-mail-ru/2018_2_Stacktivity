@@ -20,4 +20,5 @@ func NewRoom(player1 *Player, player2 *Player, rm *RoomManager) *Room {
 
 func (r *Room) Start() {
 	log.Println("starting room...")
+
 }

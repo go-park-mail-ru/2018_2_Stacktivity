@@ -41,7 +41,7 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if usernameExist || emailExist {
-		responses.Write(w, http.StatusBadRequest, "User alredy exists")
+		responses.Write(w, http.StatusConflict, "User alredy exists")
 		return
 	}
 	if err = srv.users.Add(&newUser); err != nil {
@@ -49,7 +49,7 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	responses.Write(w, http.StatusOK, newUser)
+	responses.Write(w, http.StatusCreated, newUser)
 }
 
 func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {

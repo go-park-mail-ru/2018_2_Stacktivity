@@ -1,34 +1,54 @@
 package game
 
 import (
+	"2018_2_Stacktivity/models"
+
 	log "github.com/sirupsen/logrus"
 )
 
 type RoomManager struct {
-	queue    chan *Player
-	stopchan chan struct{}
-	log      *log.Logger
+	rooms        map[string]*Room
+	queue        chan *Player
+	stopchan     chan interface{}
+	singleplayer chan *Player
+	log          *log.Logger
 }
 
 func NewRoomManager(logger *log.Logger) *RoomManager {
 	return &RoomManager{
-		queue:    make(chan *Player),
-		stopchan: make(chan struct{}),
-		log:      logger,
+		rooms:        make(map[string]*Room),
+		queue:        make(chan *Player),
+		stopchan:     make(chan interface{}),
+		singleplayer: make(chan *Player),
+		log:          logger,
 	}
 }
 
 func (rm *RoomManager) Run() {
-	rm.log.Println("starting room manager...")
+	pair := make([]*Player, 0)
 	for {
 		select {
-		default:
-			player1 := <-rm.queue
-			player2 := <-rm.queue
-			rm.log.Printf("find game: %s vs %s \n", player1.user.Username, player2.user.Username)
-			room := NewRoom(player1, player2, rm)
+		case player := <-rm.singleplayer:
+			log.Println("starting singleplayer...")
+			room := NewRoom([](*Player){player}, rm)
 			go room.Start()
+		case p := <-rm.queue:
+			pair = append(pair, p)
+			if len(pair) == 2 {
+				rm.log.Printf("find game: %s vs %s \n", pair[0].user.Username, pair[1].user.Username)
+				room := NewRoom(pair, rm)
+				for _, p := range pair {
+					p.room = room
+				}
+				rm.rooms[room.ID] = room
+				go room.Start()
+				pair = make([]*Player, 0)
+			}
 		case <-rm.stopchan:
+			rm.log.Println("stopping room manager...")
+			for _, room := range rm.rooms {
+				room.stopchanel <- models.Close
+			}
 			return
 		}
 	}

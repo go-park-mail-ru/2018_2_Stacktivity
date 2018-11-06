@@ -2,34 +2,33 @@ package server
 
 import (
 	"net/http"
-
-	"log"
-
-	"github.com/gorilla/websocket"
 )
 
-func CreateRoom(w http.ResponseWriter, r *http.Request) {
+func (srv *Server) CreateSinglePlayer(w http.ResponseWriter, r *http.Request) {
+	user := getUser(r)
+	conn, err := CreateConnection(w, r)
+	if err != nil {
+		srv.log.Println("can't create connection", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
+	srv.game.RunSinglePlayer(&user, conn)
 }
 
 func (srv *Server) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	println("func CreatePlayer")
 	user := getUser(r)
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-	conn, err := upgrader.Upgrade(w, r, nil)
+	conn, err := CreateConnection(w, r)
 	if err != nil {
-		log.Println("can't upgrade connection: ", err)
+		srv.log.Println("can't create connection", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	srv.game.AddPlayer(&user, conn)
-
 }
 
 func GetRoom(w http.ResponseWriter, r *http.Request) {
+	// TODO connect to game from room UID
 	w.WriteHeader(http.StatusOK)
 }

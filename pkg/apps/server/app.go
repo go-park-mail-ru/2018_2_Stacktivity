@@ -77,7 +77,7 @@ func (srv *Server) createRoute() {
 	gameRouter := r.PathPrefix("/game").Subrouter()
 	// Create/Get/Delete Game
 	gameRouter.Use(srv.checkAuthorization)
-	gameRouter.HandleFunc("/singleplayer", CreateRoom)
+	gameRouter.HandleFunc("/singleplayer", srv.CreateSinglePlayer)
 	gameRouter.HandleFunc("/multiplayer", srv.CreatePlayer)
 	gameRouter.HandleFunc("/room/{id:[0-9]+}", GetRoom)
 }
@@ -86,7 +86,7 @@ func StartApp() {
 	flag.Parse()
 	logger := log.New()
 	logger.SetLevel(log.InfoLevel)
-	// TODO add hook to Graylog
+	// TODO add hook for logrus
 	logger.SetOutput(os.Stdout)
 	err := storage.InitDB(config.DB)
 	if err != nil {
@@ -113,10 +113,9 @@ func StartApp() {
 	signal.Notify(c, os.Interrupt)
 
 	<-c
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-
+	srv.game.Stop()
 	srv.httpSrv.Shutdown(ctx)
 	log.Infoln("Shutdown server...")
 	os.Exit(0)

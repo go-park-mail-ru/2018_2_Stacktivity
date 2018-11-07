@@ -91,7 +91,7 @@ func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if err := json.Unmarshal(body, &updateReq); err != nil {
+	if err = json.Unmarshal(body, &updateReq); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

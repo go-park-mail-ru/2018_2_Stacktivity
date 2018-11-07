@@ -28,7 +28,7 @@ func (p *Player) Listen() {
 		m := &models.Message{}
 		err := p.conn.ReadJSON(m)
 		if websocket.IsUnexpectedCloseError(err) {
-			log.Printf("player %s was disconnected", p.user.ID)
+			log.Printf("player %d was disconnected", p.user.ID)
 			p.room.Unregister <- p
 			return
 		}

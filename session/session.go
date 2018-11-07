@@ -41,7 +41,10 @@ func (sm *SessionManager) Create(in *Session) (*SessionID, error) {
 		return nil, errors.Wrap(err, "Can't create session ID")
 	}
 	sessionID := SessionID{ID}
-	dataSerialized, _ := json.Marshal(in)
+	dataSerialized, err := json.Marshal(in)
+	if err != nil {
+		return nil, errors.Wrap(err, "can't marshal session")
+	}
 	mkey := "sessions:" + sessionID.ID.String()
 	result, err := redis.String(sm.sessions.Do("SET", mkey, dataSerialized, "EX", 86400))
 	if err != nil {

@@ -1,5 +1,5 @@
 # 2018_2_Stacktivity
-Задеплоенный проект: <a href="http://212.109.223.57:10000">тык</a>
+Задеплоенный проект: http://blep.me/
 
 <a href="http://128.68.165.22:3000/docs">OpenAPI</a> 
 
@@ -11,6 +11,6 @@
 ## Команда: 
 <a href="https://github.com/Silvman">Ломачёв Сергей</a> 
 
-<a href="https://github.com/ConstaConst">Митраков Костя</a> 
+<a href="https://github.com/mitrkos">Митраков Костя</a> 
 
 <a href="https://github.com/Falcon22">Соколов Влад</a> 

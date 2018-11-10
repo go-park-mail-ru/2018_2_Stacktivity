@@ -4,6 +4,8 @@ import (
 	"2018_2_Stacktivity/models"
 	"database/sql"
 
+	"log"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -19,9 +21,7 @@ type UserStorageI interface {
 	GetByEmail(email string) (models.User, bool, error)
 	GetByUsername(username string) (models.User, bool, error)
 
-	UpdateUsername(uid int, newUsername string) error
-	UpdateEmail(uid int, newEmail string) error
-	UpdatePassword(uid int, newEmail string) error
+	UpdateUser(uid int, update models.UserUpdate) (models.User, error)
 	UpdateScore(uid int, newScore int) error
 
 	CheckExists(models.User) (usernameExist bool, emailExist bool, err error)
@@ -99,6 +99,7 @@ var getByUsername = `SELECT * FROM "user" WHERE username = $1 LIMIT 1;`
 
 func (s *UserStorage) GetByUsername(username string) (user models.User, has bool, err error) {
 	user = models.User{}
+	log.Println(username)
 	if err = s.DB.Get(&user, getByUsername, username); err != nil {
 		if err == sql.ErrNoRows {
 			return user, false, nil
@@ -106,6 +107,15 @@ func (s *UserStorage) GetByUsername(username string) (user models.User, has bool
 		return user, false, errors.Wrap(err, "can't select from DB")
 	}
 	return user, true, nil
+}
+
+var updateUser = `UPDATE "user" SET  = coalesce(coalesce(nullif($2, ''), username)), 
+			email = coalesce(coalesce(nullif($3, ''), email)), 
+			pass = coalesce(coalesce(nullif($4, ''), pass)) WHERE nickname = $1 RETURNING fullname, email, about;`
+
+func (s *UserStorage) UpdateUser(uid int, user models.UserUpdate) (models.User, error) {
+	var newUser models.User
+	return newUser, nil
 }
 
 func (s *UserStorage) UpdateUsername(id int, newUsername string) error {

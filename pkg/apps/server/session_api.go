@@ -52,7 +52,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	responses.WriteCookie(w, "session-id", sess.ID.String(), time.Now().Add(7*24*time.Hour))
-	responses.Write(w, http.StatusOK, user)
+	responses.Write(w, http.StatusCreated, user)
 }
 
 func (srv *Server) getSession(w http.ResponseWriter, r *http.Request) {

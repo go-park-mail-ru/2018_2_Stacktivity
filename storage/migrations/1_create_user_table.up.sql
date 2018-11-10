@@ -1,3 +1,4 @@
+-- auto-generated definition
 CREATE TABLE IF NOT EXISTS "user"
 (
   uid      SERIAL       NOT NULL
@@ -6,7 +7,7 @@ CREATE TABLE IF NOT EXISTS "user"
   username VARCHAR(30)  NOT NULL,
   email    VARCHAR(30)  NOT NULL,
   pass     VARCHAR(120) NOT NULL,
-  score    INTEGER DEFAULT 0
+  score    INTEGER      DEFAULT 0
 );
 
 CREATE UNIQUE INDEX users_uid_uindex
@@ -17,3 +18,4 @@ CREATE UNIQUE INDEX users_username_uindex
 
 CREATE UNIQUE INDEX users_email_uindex
   ON "user" (email);
+

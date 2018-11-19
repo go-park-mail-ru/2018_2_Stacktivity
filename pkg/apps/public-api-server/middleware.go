@@ -1,12 +1,13 @@
-package server
+package public_api_server
 
 import (
-	"2018_2_Stacktivity/session"
 	"context"
 	"net/http"
 
 	"2018_2_Stacktivity/models"
 	"log"
+
+	"2018_2_Stacktivity/pkg/session"
 
 	"github.com/google/uuid"
 )
@@ -35,7 +36,7 @@ func (srv *Server) authMiddleware(next http.Handler) http.Handler {
 			var sess *session.Session
 			var id uuid.UUID
 			ctx := r.Context()
-			s, err := r.Cookie("session-id")
+			s, err := r.Cookie("session-server-id")
 			if err == http.ErrNoCookie {
 				isAuth = false
 			} else {
@@ -45,10 +46,12 @@ func (srv *Server) authMiddleware(next http.Handler) http.Handler {
 					ctx = context.WithValue(ctx, "isAuth", false)
 					next.ServeHTTP(w, r.WithContext(ctx))
 				}
-				isAuth, sess = srv.sm.Check(&session.SessionID{
-					ID: id,
-				})
-				if isAuth {
+				sess, err = srv.sm.Check(ctx, &session.SessionID{ID: id.String()})
+				if err != nil {
+					srv.log.Println("can't check session ID: ", err)
+				}
+				if sess != nil {
+					isAuth = true
 					ctx = context.WithValue(ctx, "userID", sess.ID)
 				}
 			}
@@ -71,7 +74,7 @@ func (srv *Server) checkAuthorization(next http.Handler) http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			log.Println("checkAuthorization")
 			if !getIsAuth(r) {
-				log.Println("user is not auth in game")
+				log.Println("user is not auth in game-server")
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
@@ -96,12 +99,12 @@ func getIsAuth(r *http.Request) bool {
 	return r.Context().Value("isAuth").(bool)
 }
 
-func getUserID(r *http.Request) int {
-	return r.Context().Value("userID").(int)
+func getUserID(r *http.Request) int32 {
+	return r.Context().Value("userID").(int32)
 }
 
-func getSessionID(r *http.Request) uuid.UUID {
-	return r.Context().Value("sessionID").(uuid.UUID)
+func getSessionID(r *http.Request) string {
+	return r.Context().Value("sessionID").(string)
 }
 
 func getUser(r *http.Request) models.User {

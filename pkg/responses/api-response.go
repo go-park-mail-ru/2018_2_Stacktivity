@@ -11,7 +11,7 @@ type Error struct {
 }
 
 type UserID struct {
-	ID int `json:"ID"`
+	ID int32 `json:"ID"`
 }
 
 func WriteCookie(w http.ResponseWriter, name string, value string, expires time.Time) {

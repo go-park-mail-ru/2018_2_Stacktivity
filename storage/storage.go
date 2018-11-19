@@ -17,11 +17,11 @@ type UserStorageI interface {
 	GetAll() ([]models.User, error)
 	GetAllWithOptions(limit int, offset int) ([]models.User, error)
 
-	GetByID(id int) (models.User, bool, error)
+	GetByID(id int32) (models.User, bool, error)
 	GetByEmail(email string) (models.User, bool, error)
 	GetByUsername(username string) (models.User, bool, error)
 
-	UpdateUser(uid int, update models.UserUpdate) (models.User, error)
+	UpdateUser(uid int32, update models.UserUpdate) (models.User, error)
 	UpdateScore(uid int, newScore int) error
 
 	CheckExists(models.User) (usernameExist bool, emailExist bool, err error)
@@ -71,7 +71,7 @@ func (s *UserStorage) GetAllWithOptions(limit int, offset int) ([]models.User, e
 
 var getByID = `SELECT * FROM "user" WHERE uID = $1 LIMIT 1;`
 
-func (s *UserStorage) GetByID(uid int) (user models.User, has bool, err error) {
+func (s *UserStorage) GetByID(uid int32) (user models.User, has bool, err error) {
 	user = models.User{}
 	if err = s.DB.Get(&user, getByID, uid); err != nil {
 		if err == sql.ErrNoRows {
@@ -113,7 +113,7 @@ var updateUser = `UPDATE "user" SET  = coalesce(coalesce(nullif($2, ''), usernam
 			email = coalesce(coalesce(nullif($3, ''), email)), 
 			pass = coalesce(coalesce(nullif($4, ''), pass)) WHERE nickname = $1 RETURNING fullname, email, about;`
 
-func (s *UserStorage) UpdateUser(uid int, user models.UserUpdate) (models.User, error) {
+func (s *UserStorage) UpdateUser(uid int32, user models.UserUpdate) (models.User, error) {
 	var newUser models.User
 	return newUser, nil
 }

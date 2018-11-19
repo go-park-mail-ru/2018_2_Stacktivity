@@ -1,9 +1,9 @@
-package server
+package public_api_server
 
 import (
 	"2018_2_Stacktivity/models"
-	"2018_2_Stacktivity/pkg/apps/game"
-	"2018_2_Stacktivity/session"
+	"2018_2_Stacktivity/pkg/apps/game-server"
+	"2018_2_Stacktivity/pkg/session"
 	"2018_2_Stacktivity/storage"
 	"2018_2_Stacktivity/storage/migrations"
 	"context"
@@ -15,29 +15,30 @@ import (
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/go-playground/validator.v9"
+	"google.golang.org/grpc"
+	validator "gopkg.in/go-playground/validator.v9"
 )
 
 type Server struct {
 	httpSrv  *http.Server
-	sm       session.SessionManagerI
+	sm       session.SessionManagerClient
 	users    storage.UserStorageI
-	game     *game.Game
+	game     *game_server.Game
 	validate *validator.Validate
 	log      *log.Logger
 }
 
-func newServer(logger *log.Logger) *Server {
+func newServer(logger *log.Logger, sessionConn *grpc.ClientConn) *Server {
 	return &Server{
 		httpSrv: &http.Server{
 			Addr:         config.Port,
 			WriteTimeout: config.WriteTimeout,
 			ReadTimeout:  config.ReadTimeout,
 		},
-		sm:       session.NewSessionManager(logger, *session.GetInstanse()),
+		sm:       session.NewSessionManagerClient(sessionConn),
 		users:    storage.GetUserStorage(),
 		validate: models.InitValidator(),
-		game:     game.NewGame(logger),
+		game:     game_server.NewGame(logger),
 		log:      logger,
 	}
 }
@@ -93,17 +94,19 @@ func StartApp() {
 		log.Warnln("can't init database", err.Error())
 		return
 	}
-	err = session.InitRedis(config.RedisAddr)
+	sessionConn, err := grpc.Dial(config.SessionAddr, grpc.WithInsecure())
 	if err != nil {
-		log.Warnln("can't init redis", err.Error())
+		log.Warnln("can't connect to grpc")
 		return
 	}
+	defer sessionConn.Close()
+
 	migrations.InitMigration()
-	srv := newServer(logger)
+	srv := newServer(logger, sessionConn)
 	srv.createRoute()
 	srv.game.Start()
 	go func() {
-		logger.Infof("Starting server on %s", config.Port)
+		logger.Infof("Starting public-api-server on %s", config.Port)
 		if err := srv.httpSrv.ListenAndServe(); err != nil {
 			log.Warnln(err)
 		}
@@ -117,6 +120,6 @@ func StartApp() {
 	defer cancel()
 	srv.game.Stop()
 	srv.httpSrv.Shutdown(ctx)
-	log.Infoln("Shutdown server...")
+	log.Infoln("Shutdown public-api-server...")
 	os.Exit(0)
 }

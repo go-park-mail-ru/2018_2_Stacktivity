@@ -26,7 +26,7 @@ ENV PATH $GOROOT/bin:$GOPATH/bin:/usr/local/go/bin:$PATH
 WORKDIR $GOPATH/src/2018_2_Stacktivity/
 ADD . $GOPATH/src/2018_2_Stacktivity/
 
-RUN go install ./cmd/server-public-api/
+RUN go install ./cmd/public-api/ && go install ./cmd/game/ && go install ./cmd/session/
 
 EXPOSE 3000
 

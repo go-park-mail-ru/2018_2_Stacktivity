@@ -1,4 +1,4 @@
-package game
+package game_server
 
 import (
 	"2018_2_Stacktivity/models"
@@ -35,7 +35,7 @@ func (rm *RoomManager) Run() {
 		case p := <-rm.queue:
 			pair = append(pair, p)
 			if len(pair) == 2 {
-				rm.log.Printf("find game: %s vs %s \n", pair[0].user.Username, pair[1].user.Username)
+				rm.log.Printf("find game-server: %s vs %s \n", pair[0].user.Username, pair[1].user.Username)
 				room := NewRoom(pair, rm)
 				for _, p := range pair {
 					p.room = room

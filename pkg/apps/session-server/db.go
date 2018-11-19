@@ -1,4 +1,4 @@
-package session
+package session_server
 
 import (
 	"github.com/garyburd/redigo/redis"

@@ -1,4 +1,4 @@
-package game
+package game_server
 
 import (
 	"2018_2_Stacktivity/models"
@@ -32,7 +32,8 @@ func NewRoom(players []*Player, rm *RoomManager) *Room {
 func (r *Room) Start() {
 	switch len(r.players) {
 	case 1:
-		// TODO add validate game for singleplayer
+		// TODO add validate game-server for singleplayer
+		log.Println("Start singleplayer")
 		go r.players[0].Listen()
 	case 2:
 		r.players[0].enemy = r.players[1]

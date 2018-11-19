@@ -1,4 +1,4 @@
-package server
+package public_api_server
 
 import (
 	"2018_2_Stacktivity/models"

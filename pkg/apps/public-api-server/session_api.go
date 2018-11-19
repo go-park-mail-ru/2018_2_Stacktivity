@@ -1,9 +1,9 @@
-package server
+package public_api_server
 
 import (
 	"2018_2_Stacktivity/models"
 	"2018_2_Stacktivity/pkg/responses"
-	"2018_2_Stacktivity/session"
+	"2018_2_Stacktivity/pkg/session"
 	"2018_2_Stacktivity/storage"
 	"encoding/json"
 	"io/ioutil"
@@ -43,15 +43,15 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	sess, err := srv.sm.Create(&session.Session{
+	sess, err := srv.sm.Create(r.Context(), &session.Session{
 		ID: user.ID,
 	})
 	if err != nil {
-		srv.log.Warnln("can't create session", err)
+		srv.log.Warnln("can't create session-server", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	responses.WriteCookie(w, "session-id", sess.ID.String(), time.Now().Add(7*24*time.Hour))
+	responses.WriteCookie(w, "session-server-id", sess.ID, time.Now().Add(7*24*time.Hour))
 	responses.Write(w, http.StatusCreated, user)
 }
 
@@ -70,7 +70,7 @@ func (srv *Server) deleteSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	srv.sm.Delete(&session.SessionID{
+	srv.sm.Delete(r.Context(), &session.SessionID{
 		ID: getSessionID(r),
 	})
 	w.WriteHeader(http.StatusOK)

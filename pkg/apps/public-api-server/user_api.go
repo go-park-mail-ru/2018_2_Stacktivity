@@ -1,4 +1,4 @@
-package server
+package public_api_server
 
 import (
 	"2018_2_Stacktivity/models"
@@ -62,11 +62,11 @@ func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {
 		responses.Write(w, http.StatusBadRequest, "Incorrect path")
 		return
 	}
-	if id != getUserID(r) {
+	if int32(id) != getUserID(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	user, has, err := srv.users.GetByID(id)
+	user, has, err := srv.users.GetByID(int32(id))
 	if err != nil {
 		srv.log.Warnln("can't get user", err)
 		w.WriteHeader(http.StatusInternalServerError)

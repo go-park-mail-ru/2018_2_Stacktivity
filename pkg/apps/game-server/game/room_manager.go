@@ -1,4 +1,4 @@
-package game_server
+package game
 
 import (
 	"2018_2_Stacktivity/models"
@@ -25,6 +25,7 @@ func NewRoomManager(logger *log.Logger) *RoomManager {
 }
 
 func (rm *RoomManager) Run() {
+	log.Println("Starting room manager")
 	pair := make([]*Player, 0)
 	for {
 		select {
@@ -45,7 +46,7 @@ func (rm *RoomManager) Run() {
 				pair = make([]*Player, 0)
 			}
 		case <-rm.stopchan:
-			rm.log.Println("stopping room manager...")
+			rm.log.Println("stopping game manager...")
 			for _, room := range rm.rooms {
 				room.stopchanel <- models.Close
 			}

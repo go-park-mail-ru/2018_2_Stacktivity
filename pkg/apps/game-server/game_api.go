@@ -1,4 +1,4 @@
-package public_api_server
+package game_server
 
 import (
 	"net/http"
@@ -29,6 +29,6 @@ func (srv *Server) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetRoom(w http.ResponseWriter, r *http.Request) {
-	// TODO connect to game-server from room UID
+	// TODO connect to game-server from game UID
 	w.WriteHeader(http.StatusOK)
 }

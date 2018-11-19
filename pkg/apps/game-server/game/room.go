@@ -1,4 +1,4 @@
-package game_server
+package game
 
 import (
 	"2018_2_Stacktivity/models"
@@ -19,7 +19,7 @@ type Room struct {
 }
 
 func NewRoom(players []*Player, rm *RoomManager) *Room {
-	log.Println("creating room...")
+	log.Println("creating game...")
 	return &Room{ID: uuid.New().String(),
 		players:    players,
 		Message:    make(chan *IncomingMessage),

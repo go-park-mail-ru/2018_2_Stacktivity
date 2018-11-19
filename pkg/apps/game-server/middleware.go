@@ -1,9 +1,10 @@
-package public_api_server
+package game_server
 
 import (
 	"2018_2_Stacktivity/models"
 	"2018_2_Stacktivity/pkg/session"
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -63,6 +64,32 @@ func (srv *Server) logginigMiddleware(next http.Handler) http.Handler {
 		func(w http.ResponseWriter, r *http.Request) {
 			srv.log.Infoln(r.Method, r.URL.Path)
 			next.ServeHTTP(w, r)
+		})
+}
+
+func (srv *Server) checkAuthorization(next http.Handler) http.Handler {
+	return http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			log.Println("checkAuthorization")
+			if !getIsAuth(r) {
+				log.Println("user is not auth in game-server")
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			id := getUserID(r)
+			user, has, err := srv.users.GetByID(id)
+			if err != nil {
+				log.Println("can't get user by ID: ", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			if !has {
+				log.Printf("user not found by ID: %d\n", id)
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			ctx := context.WithValue(r.Context(), "user", user)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 }
 

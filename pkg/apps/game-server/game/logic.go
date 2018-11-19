@@ -1,4 +1,4 @@
-package game_server
+package game
 
 import "2018_2_Stacktivity/models"
 

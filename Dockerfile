@@ -44,4 +44,4 @@ EXPOSE 6379
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
 USER root
-CMD service postgresql start && redis-server --daemonize yes && server-public-api
+CMD service postgresql start && redis-server --daemonize yes && session && game && public-api

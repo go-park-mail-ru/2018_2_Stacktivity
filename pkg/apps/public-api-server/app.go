@@ -2,7 +2,6 @@ package public_api_server
 
 import (
 	"2018_2_Stacktivity/models"
-	"2018_2_Stacktivity/pkg/apps/game-server"
 	"2018_2_Stacktivity/pkg/session"
 	"2018_2_Stacktivity/storage"
 	"2018_2_Stacktivity/storage/migrations"
@@ -20,10 +19,10 @@ import (
 )
 
 type Server struct {
-	httpSrv  *http.Server
-	sm       session.SessionManagerClient
-	users    storage.UserStorageI
-	game     *game_server.Game
+	httpSrv *http.Server
+	sm      session.SessionManagerClient
+	users   storage.UserStorageI
+
 	validate *validator.Validate
 	log      *log.Logger
 }
@@ -38,7 +37,6 @@ func newServer(logger *log.Logger, sessionConn *grpc.ClientConn) *Server {
 		sm:       session.NewSessionManagerClient(sessionConn),
 		users:    storage.GetUserStorage(),
 		validate: models.InitValidator(),
-		game:     game_server.NewGame(logger),
 		log:      logger,
 	}
 }
@@ -74,13 +72,6 @@ func (srv *Server) createRoute() {
 	sessionRouter.HandleFunc("", srv.getSession).Methods(http.MethodGet)
 	sessionRouter.HandleFunc("", srv.deleteSession).Methods(http.MethodDelete, http.MethodOptions)
 	srv.httpSrv.Handler = r
-
-	gameRouter := r.PathPrefix("/game").Subrouter()
-	// Create/Get/Delete Game
-	gameRouter.Use(srv.checkAuthorization)
-	gameRouter.HandleFunc("/singleplayer", srv.CreateSinglePlayer)
-	gameRouter.HandleFunc("/multiplayer", srv.CreatePlayer)
-	gameRouter.HandleFunc("/room/{id:[0-9]+}", GetRoom)
 }
 
 func StartApp() {
@@ -104,7 +95,7 @@ func StartApp() {
 	migrations.InitMigration()
 	srv := newServer(logger, sessionConn)
 	srv.createRoute()
-	srv.game.Start()
+
 	go func() {
 		logger.Infof("Starting public-api-server on %s", config.Port)
 		if err := srv.httpSrv.ListenAndServe(); err != nil {
@@ -118,7 +109,6 @@ func StartApp() {
 	<-c
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	srv.game.Stop()
 	srv.httpSrv.Shutdown(ctx)
 	log.Infoln("Shutdown public-api-server...")
 	os.Exit(0)

@@ -1,7 +1,7 @@
-package game
+package main
 
-import "2018_2_Stacktivity/pkg/apps/game-server"
+import . "2018_2_Stacktivity/pkg/apps/game-server"
 
 func main() {
-	game_server.StartApp()
+	StartApp()
 }

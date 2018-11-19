@@ -1,4 +1,4 @@
-package game_server
+package game
 
 import (
 	"2018_2_Stacktivity/models"
@@ -30,11 +30,9 @@ func (g *Game) AddPlayer(user *models.User, ws *websocket.Conn) {
 }
 
 func (g *Game) Start() {
-	g.log.Println("starting game-server...")
 	go g.rm.Run()
 }
 
 func (g *Game) Stop() {
-	g.log.Println("stopping game-server...")
 	g.rm.stopchan <- 0
 }

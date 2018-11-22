@@ -5,7 +5,6 @@ import (
 	"2018_2_Stacktivity/pkg/responses"
 	"2018_2_Stacktivity/pkg/session"
 	"2018_2_Stacktivity/storage"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -24,7 +23,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if err = json.Unmarshal(body, &loginReq); err != nil {
+	if err := loginReq.UnmarshalJSON(body); err != nil {
 		srv.log.Warnln("can't unmarshal request", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return

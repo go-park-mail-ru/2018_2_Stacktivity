@@ -53,8 +53,7 @@ func (sm *SessionManager) Check(ctx context.Context, in *session.SessionID) (*se
 		return nil, errors.Wrap(err, "can't get data")
 	}
 	sess := &session.Session{}
-	err = json.Unmarshal(data, sess)
-	if err != nil {
+	if err = sess.UnmarshalJSON(data); err != nil {
 		return nil, errors.Wrap(err, "can't unpack session-server data")
 	}
 	return sess, nil

@@ -3,7 +3,6 @@ package public_api_server
 import (
 	"2018_2_Stacktivity/models"
 	"2018_2_Stacktivity/pkg/responses"
-	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -24,7 +23,7 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if err = json.Unmarshal(body, &registrationReq); err != nil {
+	if err = registrationReq.UnmarshalJSON(body); err != nil {
 		srv.log.Warnln("can't unmarshal request", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -91,7 +90,7 @@ func (srv *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if err = json.Unmarshal(body, &updateReq); err != nil {
+	if err = updateReq.UnmarshalJSON(body); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

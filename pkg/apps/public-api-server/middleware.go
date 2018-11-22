@@ -52,7 +52,7 @@ func (srv *Server) authMiddleware(next http.Handler) http.Handler {
 					ctx = context.WithValue(ctx, "userID", sess.ID)
 				}
 			}
-			ctx = context.WithValue(ctx, "sessionID", id)
+			ctx = context.WithValue(ctx, "sessionID", id.String())
 			ctx = context.WithValue(ctx, "isAuth", isAuth)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

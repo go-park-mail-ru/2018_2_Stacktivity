@@ -3,7 +3,6 @@ package storage
 import (
 	"2018_2_Stacktivity/models"
 	"database/sql"
-
 	"log"
 
 	"github.com/jmoiron/sqlx"

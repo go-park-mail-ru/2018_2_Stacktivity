@@ -163,6 +163,14 @@ func (cs *ChatStorage) GetAllChats() (*[]models.Chat, error) {
 		if err := rows.Scan(&chat.ID, &chat.Name); err != nil {
 			return nil, err
 		}
+		users, err := cs.GetChatUsers(chat.ID)
+		if err != nil {
+			return nil, err
+		}
+		chat.Members = make([]string, 0)
+		for _, user := range *users {
+			chat.Members = append(chat.Members, user.Username)
+		}
 		chats = append(chats, chat)
 	}
 	return &chats, nil

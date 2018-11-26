@@ -10,6 +10,7 @@ var (
 	DropBall      = 7
 	EndGame       = 8
 	Close         = 9
+	GetLevel      = 10
 	StatusSuccess = "success"
 	StatusFailure = "failure"
 )
@@ -25,7 +26,7 @@ type Ball struct {
 
 type Level struct {
 	LevelNumber int    `json:"levelNumber"`
-	Balls       []Ball `json:"balls"`
+	Balls       []Ball `json:"balls,omitempty"`
 }
 
 type Dot struct {

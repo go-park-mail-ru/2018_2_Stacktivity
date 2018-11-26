@@ -34,7 +34,9 @@ func (r *Room) Start() {
 	case 1:
 		// TODO add validate game-server for singleplayer
 		log.Println("Start singleplayer")
+		go r.RunBroadcast()
 		go r.players[0].Listen()
+		go r.ListenToPlayers()
 	case 2:
 		r.players[0].enemy = r.players[1]
 		r.players[1].enemy = r.players[0]
@@ -72,15 +74,40 @@ func (r *Room) ListenToPlayers() {
 			log.Printf("Message from player %s: %v", m.Player.user.Username, m.Message)
 			switch m.Message.Event {
 			case models.UpdateCurv:
+				log.Println("Update curv")
 				if CheckCurve() {
 					UpdateCurve()
-					m.Player.enemy.Send(m.Message)
+					if len(r.players) == 2 {
+						m.Player.enemy.Send(m.Message)
+					}
+
 				} else {
 					r.Broadcast <- &models.Message{Event: models.InvalidDrop}
 				}
 			case models.EndCurv:
-				m.Player.enemy.Send(m.Message)
+				log.Println("End curv")
+				if len(r.players) == 2 {
+					m.Player.enemy.Send(m.Message)
+				}
 				StartCurve(m.Message.Curve)
+			case models.GetLevel:
+				log.Println("Get level ", m.Message.Level.LevelNumber)
+				m.Player.Send(&models.Message{
+					Event: models.GetLevel,
+					Level: &models.Level{
+						LevelNumber: 0,
+						Balls: []models.Ball{
+							{
+								Number: 0,
+								X:      636,
+								Y:      360,
+								R:      80,
+								Type:   "goal",
+								Color:  "Blue",
+							},
+						},
+					},
+				})
 			}
 		case p := <-r.Unregister:
 			log.Printf("Player %s exit", p.user.Username)
@@ -88,7 +115,9 @@ func (r *Room) ListenToPlayers() {
 				Event:  models.EndGame,
 				Status: &models.StatusSuccess,
 			}
-			p.enemy.Send(msg)
+			if len(r.players) == 2 {
+				p.enemy.Send(msg)
+			}
 			return
 		case <-r.stopchanel:
 			log.Println("Close listening")

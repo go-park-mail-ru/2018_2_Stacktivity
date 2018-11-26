@@ -32,6 +32,7 @@ func (rm *RoomManager) Run() {
 		case player := <-rm.singleplayer:
 			log.Println("starting singleplayer...")
 			room := NewRoom([](*Player){player}, rm)
+			player.room = room
 			go room.Start()
 		case p := <-rm.queue:
 			pair = append(pair, p)

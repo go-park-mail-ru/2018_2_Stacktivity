@@ -77,48 +77,54 @@ func easyjson85f0d656Decode20182StacktivityModels(in *jlexer.Lexer, out *Message
 				if out.Level == nil {
 					out.Level = new(Level)
 				}
-				(*out.Level).UnmarshalEasyJSON(in)
+				if data := in.Raw(); in.Ok() {
+					in.AddError((*out.Level).UnmarshalJSON(data))
+				}
 			}
-		case "curve":
+		case "line":
 			if in.IsNull() {
 				in.Skip()
-				out.Curve = nil
+				out.Line = nil
 			} else {
-				if out.Curve == nil {
-					out.Curve = new([]Dot)
+				if out.Line == nil {
+					out.Line = new([]Dot)
 				}
 				if in.IsNull() {
 					in.Skip()
-					*out.Curve = nil
+					*out.Line = nil
 				} else {
 					in.Delim('[')
-					if *out.Curve == nil {
+					if *out.Line == nil {
 						if !in.IsDelim(']') {
-							*out.Curve = make([]Dot, 0, 4)
+							*out.Line = make([]Dot, 0, 4)
 						} else {
-							*out.Curve = []Dot{}
+							*out.Line = []Dot{}
 						}
 					} else {
-						*out.Curve = (*out.Curve)[:0]
+						*out.Line = (*out.Line)[:0]
 					}
 					for !in.IsDelim(']') {
 						var v2 Dot
-						(v2).UnmarshalEasyJSON(in)
-						*out.Curve = append(*out.Curve, v2)
+						if data := in.Raw(); in.Ok() {
+							in.AddError((v2).UnmarshalJSON(data))
+						}
+						*out.Line = append(*out.Line, v2)
 						in.WantComma()
 					}
 					in.Delim(']')
 				}
 			}
-		case "ball":
+		case "circle":
 			if in.IsNull() {
 				in.Skip()
-				out.Ball = nil
+				out.Circle = nil
 			} else {
-				if out.Ball == nil {
-					out.Ball = new(Ball)
+				if out.Circle == nil {
+					out.Circle = new(Circle)
 				}
-				(*out.Ball).UnmarshalEasyJSON(in)
+				if data := in.Raw(); in.Ok() {
+					in.AddError((*out.Circle).UnmarshalJSON(data))
+				}
 			}
 		case "status":
 			if in.IsNull() {
@@ -183,38 +189,38 @@ func easyjson85f0d656Encode20182StacktivityModels(out *jwriter.Writer, in Messag
 		} else {
 			out.RawString(prefix)
 		}
-		(*in.Level).MarshalEasyJSON(out)
+		out.Raw((*in.Level).MarshalJSON())
 	}
-	if in.Curve != nil {
-		const prefix string = ",\"curve\":"
+	if in.Line != nil {
+		const prefix string = ",\"line\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])
 		} else {
 			out.RawString(prefix)
 		}
-		if *in.Curve == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		if *in.Line == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v5, v6 := range *in.Curve {
+			for v5, v6 := range *in.Line {
 				if v5 > 0 {
 					out.RawByte(',')
 				}
-				(v6).MarshalEasyJSON(out)
+				out.Raw((v6).MarshalJSON())
 			}
 			out.RawByte(']')
 		}
 	}
-	if in.Ball != nil {
-		const prefix string = ",\"ball\":"
+	if in.Circle != nil {
+		const prefix string = ",\"circle\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])
 		} else {
 			out.RawString(prefix)
 		}
-		(*in.Ball).MarshalEasyJSON(out)
+		out.Raw((*in.Circle).MarshalJSON())
 	}
 	if in.Status != nil {
 		const prefix string = ",\"status\":"
@@ -252,122 +258,7 @@ func (v *Message) UnmarshalJSON(data []byte) error {
 func (v *Message) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson85f0d656Decode20182StacktivityModels(l, v)
 }
-func easyjson85f0d656Decode20182StacktivityModels1(in *jlexer.Lexer, out *Level) {
-	isTopLevel := in.IsStart()
-	if in.IsNull() {
-		if isTopLevel {
-			in.Consumed()
-		}
-		in.Skip()
-		return
-	}
-	in.Delim('{')
-	for !in.IsDelim('}') {
-		key := in.UnsafeString()
-		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
-		switch key {
-		case "levelNumber":
-			out.LevelNumber = int(in.Int())
-		case "balls":
-			if in.IsNull() {
-				in.Skip()
-				out.Balls = nil
-			} else {
-				in.Delim('[')
-				if out.Balls == nil {
-					if !in.IsDelim(']') {
-						out.Balls = make([]Ball, 0, 1)
-					} else {
-						out.Balls = []Ball{}
-					}
-				} else {
-					out.Balls = (out.Balls)[:0]
-				}
-				for !in.IsDelim(']') {
-					var v7 Ball
-					(v7).UnmarshalEasyJSON(in)
-					out.Balls = append(out.Balls, v7)
-					in.WantComma()
-				}
-				in.Delim(']')
-			}
-		default:
-			in.SkipRecursive()
-		}
-		in.WantComma()
-	}
-	in.Delim('}')
-	if isTopLevel {
-		in.Consumed()
-	}
-}
-func easyjson85f0d656Encode20182StacktivityModels1(out *jwriter.Writer, in Level) {
-	out.RawByte('{')
-	first := true
-	_ = first
-	{
-		const prefix string = ",\"levelNumber\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		out.Int(int(in.LevelNumber))
-	}
-	{
-		const prefix string = ",\"balls\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
-		if in.Balls == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v8, v9 := range in.Balls {
-				if v8 > 0 {
-					out.RawByte(',')
-				}
-				(v9).MarshalEasyJSON(out)
-			}
-			out.RawByte(']')
-		}
-	}
-	out.RawByte('}')
-}
-
-// MarshalJSON supports json.Marshaler interface
-func (v Level) MarshalJSON() ([]byte, error) {
-	w := jwriter.Writer{}
-	easyjson85f0d656Encode20182StacktivityModels1(&w, v)
-	return w.Buffer.BuildBytes(), w.Error
-}
-
-// MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Level) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson85f0d656Encode20182StacktivityModels1(w, v)
-}
-
-// UnmarshalJSON supports json.Unmarshaler interface
-func (v *Level) UnmarshalJSON(data []byte) error {
-	r := jlexer.Lexer{Data: data}
-	easyjson85f0d656Decode20182StacktivityModels1(&r, v)
-	return r.Error()
-}
-
-// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Level) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson85f0d656Decode20182StacktivityModels1(l, v)
-}
-func easyjson85f0d656Decode20182StacktivityModels2(in *jlexer.Lexer, out *Dot) {
+func easyjson85f0d656Decode20182StacktivityModels1(in *jlexer.Lexer, out *Dot) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -400,7 +291,7 @@ func easyjson85f0d656Decode20182StacktivityModels2(in *jlexer.Lexer, out *Dot) {
 		in.Consumed()
 	}
 }
-func easyjson85f0d656Encode20182StacktivityModels2(out *jwriter.Writer, in Dot) {
+func easyjson85f0d656Encode20182StacktivityModels1(out *jwriter.Writer, in Dot) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -430,27 +321,27 @@ func easyjson85f0d656Encode20182StacktivityModels2(out *jwriter.Writer, in Dot) 
 // MarshalJSON supports json.Marshaler interface
 func (v Dot) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson85f0d656Encode20182StacktivityModels2(&w, v)
+	easyjson85f0d656Encode20182StacktivityModels1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Dot) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson85f0d656Encode20182StacktivityModels2(w, v)
+	easyjson85f0d656Encode20182StacktivityModels1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Dot) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson85f0d656Decode20182StacktivityModels2(&r, v)
+	easyjson85f0d656Decode20182StacktivityModels1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Dot) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson85f0d656Decode20182StacktivityModels2(l, v)
+	easyjson85f0d656Decode20182StacktivityModels1(l, v)
 }
-func easyjson85f0d656Decode20182StacktivityModels3(in *jlexer.Lexer, out *Ball) {
+func easyjson85f0d656Decode20182StacktivityModels2(in *jlexer.Lexer, out *Level) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -469,7 +360,122 @@ func easyjson85f0d656Decode20182StacktivityModels3(in *jlexer.Lexer, out *Ball) 
 			continue
 		}
 		switch key {
-		case "number":
+		case "levelNumber":
+			out.LevelNumber = int(in.Int())
+		case "circles":
+			if in.IsNull() {
+				in.Skip()
+				out.Circles = nil
+			} else {
+				in.Delim('[')
+				if out.Circles == nil {
+					if !in.IsDelim(']') {
+						out.Circles = make([]Circle, 0, 1)
+					} else {
+						out.Circles = []Circle{}
+					}
+				} else {
+					out.Circles = (out.Circles)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v7 Circle
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v7).UnmarshalJSON(data))
+					}
+					out.Circles = append(out.Circles, v7)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson85f0d656Encode20182StacktivityModels2(out *jwriter.Writer, in Level) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"levelNumber\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.LevelNumber))
+	}
+	if len(in.Circles) != 0 {
+		const prefix string = ",\"circles\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		{
+			out.RawByte('[')
+			for v8, v9 := range in.Circles {
+				if v8 > 0 {
+					out.RawByte(',')
+				}
+				out.Raw((v9).MarshalJSON())
+			}
+			out.RawByte(']')
+		}
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v Level) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson85f0d656Encode20182StacktivityModels2(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v Level) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson85f0d656Encode20182StacktivityModels2(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *Level) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson85f0d656Decode20182StacktivityModels2(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *Level) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson85f0d656Decode20182StacktivityModels2(l, v)
+}
+func easyjson85f0d656Decode20182StacktivityModels3(in *jlexer.Lexer, out *Circle) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "num":
 			out.Number = int(in.Int())
 		case "x":
 			out.X = int(in.Int())
@@ -491,12 +497,12 @@ func easyjson85f0d656Decode20182StacktivityModels3(in *jlexer.Lexer, out *Ball) 
 		in.Consumed()
 	}
 }
-func easyjson85f0d656Encode20182StacktivityModels3(out *jwriter.Writer, in Ball) {
+func easyjson85f0d656Encode20182StacktivityModels3(out *jwriter.Writer, in Circle) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"number\":"
+		const prefix string = ",\"num\":"
 		if first {
 			first = false
 			out.RawString(prefix[1:])
@@ -559,25 +565,25 @@ func easyjson85f0d656Encode20182StacktivityModels3(out *jwriter.Writer, in Ball)
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v Ball) MarshalJSON() ([]byte, error) {
+func (v Circle) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson85f0d656Encode20182StacktivityModels3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v Ball) MarshalEasyJSON(w *jwriter.Writer) {
+func (v Circle) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson85f0d656Encode20182StacktivityModels3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *Ball) UnmarshalJSON(data []byte) error {
+func (v *Circle) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson85f0d656Decode20182StacktivityModels3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *Ball) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *Circle) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson85f0d656Decode20182StacktivityModels3(l, v)
 }

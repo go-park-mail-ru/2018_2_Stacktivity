@@ -89,14 +89,14 @@ func (r *Room) ListenToPlayers() {
 				if len(r.players) == 2 {
 					m.Player.enemy.Send(m.Message)
 				}
-				StartCurve(m.Message.Curve)
+				StartCurve(m.Message.Line)
 			case models.GetLevel:
 				log.Println("Get level ", m.Message.Level.LevelNumber)
 				m.Player.Send(&models.Message{
 					Event: models.GetLevel,
 					Level: &models.Level{
 						LevelNumber: 0,
-						Balls: []models.Ball{
+						Circles: []models.Circle{
 							{
 								Number: 0,
 								X:      636,

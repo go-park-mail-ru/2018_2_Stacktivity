@@ -6,6 +6,8 @@ import (
 	"2018_2_Stacktivity/storage"
 	"context"
 	"flag"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 	"os/signal"
@@ -47,9 +49,24 @@ func (srv *Server) createRoute() {
 	gameRouter := r.PathPrefix("/game").Subrouter()
 	// Create/Get/Delete Game
 	gameRouter.Use(srv.checkAuthorization)
-	gameRouter.HandleFunc("/singleplayer", srv.CreateSinglePlayer)
-	gameRouter.HandleFunc("/multiplayer", srv.CreatePlayer)
-	gameRouter.HandleFunc("/game/{id:[0-9]+}", GetRoom)
+
+	gameRouter.HandleFunc("/singleplayer", promhttp.InstrumentHandlerCounter(
+		singleplayerHitsMetric,
+		http.HandlerFunc(srv.CreateSinglePlayer),
+	))
+
+	gameRouter.HandleFunc("/multiplayer", promhttp.InstrumentHandlerCounter(
+		multiplayerHitsMetric,
+		http.HandlerFunc(srv.CreatePlayer),
+	))
+
+	gameRouter.HandleFunc("/game/{id:[0-9]+}", promhttp.InstrumentHandlerCounter(
+		gameHitsMetric,
+		http.HandlerFunc(GetRoom),
+	))
+
+	r.Handle("/metrics", promhttp.Handler())
+
 	srv.httpSrv.Handler = r
 }
 
@@ -70,6 +87,8 @@ func StartApp() {
 		return
 	}
 	defer sessionConn.Close()
+
+	prometheus.MustRegister(PlayersLeftGameMetric, PlayersPendingRoomMetric, RoomCountMetric, singleplayerHitsMetric, multiplayerHitsMetric, gameHitsMetric)
 
 	srv := newServer(logger, sessionConn)
 	srv.createRoute()

@@ -2,7 +2,6 @@ package game
 
 import (
 	"2018_2_Stacktivity/models"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,6 +30,9 @@ func (rm *RoomManager) Run() {
 		select {
 		case player := <-rm.singleplayer:
 			log.Println("starting singleplayer...")
+			PlayersPendingRoomMetric.With(labelTypeSingle).Dec() // players pending room metric update
+			RoomCountMetric.With(labelTypeSingle).Inc()          // room metric update
+
 			room := NewRoom([](*Player){player}, rm)
 			player.room = room
 			go room.Start()
@@ -38,6 +40,9 @@ func (rm *RoomManager) Run() {
 			pair = append(pair, p)
 			if len(pair) == 2 {
 				rm.log.Printf("find game-server: %s vs %s \n", pair[0].user.Username, pair[1].user.Username)
+				PlayersPendingRoomMetric.With(labelTypeMult).Sub(2) // players pending room metric update
+				RoomCountMetric.With(labelTypeMult).Inc()           // room metric update
+
 				room := NewRoom(pair, rm)
 				for _, p := range pair {
 					p.room = room
@@ -51,6 +56,10 @@ func (rm *RoomManager) Run() {
 			for _, room := range rm.rooms {
 				room.stopchanel <- models.Close
 			}
+
+			// room metric reset
+			RoomCountMetric.With(labelTypeSingle).Set(0)
+			RoomCountMetric.With(labelTypeMult).Set(0)
 			return
 		}
 	}

@@ -4,10 +4,9 @@ import (
 	"2018_2_Stacktivity/models"
 	"2018_2_Stacktivity/pkg/session"
 	"context"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
 func corsMiddleware(next http.Handler) http.Handler {

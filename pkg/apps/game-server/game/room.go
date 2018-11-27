@@ -111,12 +111,18 @@ func (r *Room) ListenToPlayers() {
 			}
 		case p := <-r.Unregister:
 			log.Printf("Player %s exit", p.user.Username)
+
+			PlayersLeftGameMetric.Inc() // player left game metric update
+
 			msg := &models.Message{
 				Event:  models.EndGame,
 				Status: &models.StatusSuccess,
 			}
 			if len(r.players) == 2 {
 				p.enemy.Send(msg)
+				RoomCountMetric.With(labelTypeMult).Dec() // room metric update
+			} else {
+				RoomCountMetric.With(labelTypeSingle).Dec() // room metric update
 			}
 			return
 		case <-r.stopchanel:

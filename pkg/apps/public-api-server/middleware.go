@@ -4,7 +4,9 @@ import (
 	"2018_2_Stacktivity/models"
 	"2018_2_Stacktivity/pkg/session"
 	"context"
+	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 )
@@ -24,6 +26,31 @@ func corsMiddleware(next http.Handler) http.Handler {
 			}
 			next.ServeHTTP(w, r)
 		})
+}
+
+// re-implementation of ResponseWriter to access status code
+type statusWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (w *statusWriter) WriteHeader(code int) {
+	if code != 0 {
+		w.statusCode = code
+	} else {
+		w.statusCode = 200
+	}
+
+	w.ResponseWriter.WriteHeader(code)
+}
+
+func (srv *Server) metricsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		writter := statusWriter{w, 200}
+		next.ServeHTTP(&writter, r)
+		//log.Println("metric increment")
+		ApiMetric.With(prometheus.Labels{"code": strconv.Itoa(writter.statusCode), "path": r.URL.Path, "method": r.Method}).Inc()
+	})
 }
 
 func (srv *Server) authMiddleware(next http.Handler) http.Handler {

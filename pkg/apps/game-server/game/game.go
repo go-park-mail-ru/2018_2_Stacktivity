@@ -21,11 +21,15 @@ func NewGame(logger *log.Logger) *Game {
 
 func (g *Game) RunSinglePlayer(user *models.User, ws *websocket.Conn) {
 	player := NewPlayer(user, ws)
+
+	PlayersPendingRoomMetric.With(labelTypeSingle).Inc()
 	g.rm.singleplayer <- player
 }
 
 func (g *Game) AddPlayer(user *models.User, ws *websocket.Conn) {
 	player := NewPlayer(user, ws)
+
+	PlayersPendingRoomMetric.With(labelTypeMult).Inc()
 	g.rm.queue <- player
 }
 

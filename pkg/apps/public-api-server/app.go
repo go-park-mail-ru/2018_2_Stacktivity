@@ -7,6 +7,8 @@ import (
 	"2018_2_Stacktivity/storage/migrations"
 	"context"
 	"flag"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,7 +17,7 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	validator "gopkg.in/go-playground/validator.v9"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type Server struct {
@@ -41,40 +43,123 @@ func newServer(logger *log.Logger, sessionConn *grpc.ClientConn) *Server {
 	}
 }
 
+var (
+	scoreboardHitMetric = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "public_api_scoreboard_handler_requests_total",
+			Help: "Total number of requests by HTTP status code and method.",
+		},
+		[]string{"code", "method"}, // "method" label is for OPTIONS
+	)
+
+	createUserHitMetric = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "public_api_create_user_handler_requests_total",
+			Help: "Total number of requests by HTTP status code and method",
+		},
+		[]string{"code", "method"}, // "method" label is for OPTIONS
+	)
+
+	getUserHitMetric = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "public_api_get_user_handler_requests_total",
+			Help: "Total number of requests by HTTP status code and method",
+		},
+		[]string{"code", "method"}, // "method" label is for OPTIONS
+	)
+
+	updateUserHitMetric = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "public_api_update_user_handler_requests_total",
+			Help: "Total number of requests by HTTP status code and method.",
+		},
+		[]string{"code", "method"}, // "method" label is for OPTIONS
+	)
+
+	getAllUsersHitMetric = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "public_api_get_all_users_handler_requests_total",
+			Help: "Total number of requests by HTTP status code and method.",
+		},
+		[]string{"code", "method"}, // "method" label is for OPTIONS
+	)
+
+	sessionHitMetrics = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "public_api_session_handler_requests_total",
+			Help: "Total number of requests by HTTP status code and method.",
+		},
+		[]string{"code", "method"},
+	)
+)
+
+func getBoundCounterMetricMiddleware(counter *prometheus.CounterVec) mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return promhttp.InstrumentHandlerCounter(counter, next)
+	}
+}
+
 func (srv *Server) createRoute() {
+	prometheus.MustRegister(scoreboardHitMetric, createUserHitMetric, getUserHitMetric, updateUserHitMetric, getAllUsersHitMetric, sessionHitMetrics)
+
 	r := mux.NewRouter()
 	r.Use(srv.logginigMiddleware)
 	r.Use(corsMiddleware)
 	r.Use(srv.authMiddleware)
 
 	// route for OPTIONS
-	r.HandleFunc("/", srv.getSession).Methods(http.MethodOptions)
+	//r.HandleFunc("/", srv.getSession).Methods(http.MethodOptions)
 
 	userRouter := r.PathPrefix("/user").Subrouter()
 
 	// GetScoreboard
-	userRouter.HandleFunc("", srv.GetUsersWithOptions).Methods(http.MethodGet).
+	userRouter.HandleFunc("", promhttp.InstrumentHandlerCounter(
+		scoreboardHitMetric,
+		http.HandlerFunc(srv.GetUsersWithOptions),
+	)).Methods(http.MethodGet).
 		Queries("limit", "{limit:[0-9]*?}", "offset", "{offset:[0-9]*?}")
 
 	// Create/Get User
-	userRouter.HandleFunc("", srv.createUser).Methods(http.MethodPost, http.MethodOptions)
-	userRouter.HandleFunc("/{id:[0-9]+}", srv.getUser).Methods(http.MethodGet)
+	userRouter.HandleFunc("", promhttp.InstrumentHandlerCounter(
+		createUserHitMetric,
+		http.HandlerFunc(srv.createUser),
+	)).Methods(http.MethodPost, http.MethodOptions)
+
+	userRouter.HandleFunc("/{id:[0-9]+}", promhttp.InstrumentHandlerCounter(
+		getUserHitMetric,
+		http.HandlerFunc(srv.getUser),
+	)).Methods(http.MethodGet)
 
 	// UpdateUser
-	userRouter.HandleFunc("/{id:[0-9]+}", srv.updateUser).Methods(http.MethodPatch, http.MethodOptions)
+	userRouter.HandleFunc("/{id:[0-9]+}", promhttp.InstrumentHandlerCounter(
+		updateUserHitMetric,
+		http.HandlerFunc(srv.updateUser),
+	)).Methods(http.MethodPatch, http.MethodOptions)
 
 	// GetAllUsers
-	userRouter.HandleFunc("", srv.getUsers).Methods(http.MethodGet)
+	userRouter.HandleFunc("", promhttp.InstrumentHandlerCounter(
+		getAllUsersHitMetric,
+		http.HandlerFunc(srv.getUsers),
+	)).Methods(http.MethodGet)
 
 	sessionRouter := r.PathPrefix("/session").Subrouter()
+	sessionRouter.Use(getBoundCounterMetricMiddleware(sessionHitMetrics))
+
 	// Create/Get/Delete Session
 	sessionRouter.HandleFunc("", srv.createSession).Methods(http.MethodPost, http.MethodOptions)
 	sessionRouter.HandleFunc("", srv.getSession).Methods(http.MethodGet)
 	sessionRouter.HandleFunc("", srv.deleteSession).Methods(http.MethodDelete, http.MethodOptions)
+
+	// Prometheus handler
+	r.Handle("/metrics", promhttp.Handler())
+
 	srv.httpSrv.Handler = r
 }
 
+var ()
+
 func StartApp() {
+
 	flag.Parse()
 	logger := log.New()
 	logger.SetLevel(log.InfoLevel)

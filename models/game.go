@@ -10,12 +10,13 @@ var (
 	DropBall      = 7
 	EndGame       = 8
 	Close         = 9
+	GetLevel      = 10
 	StatusSuccess = "success"
 	StatusFailure = "failure"
 )
 
-type Ball struct {
-	Number int    `json:"number"`
+type Circle struct {
+	Number int    `json:"num"`
 	X      int    `json:"x"`
 	Y      int    `json:"y"`
 	R      int    `json:"r"`
@@ -24,8 +25,8 @@ type Ball struct {
 }
 
 type Level struct {
-	LevelNumber int    `json:"levelNumber"`
-	Balls       []Ball `json:"balls"`
+	LevelNumber int      `json:"levelNumber"`
+	Circles     []Circle `json:"circles,omitempty"`
 }
 
 type Dot struct {
@@ -37,7 +38,7 @@ type Message struct {
 	Event   int       `json:"event"`
 	Players *[]string `json:"players,omitempty"`
 	Level   *Level    `json:"level,omitempty"`
-	Curve   *[]Dot    `json:"curve,omitempty"`
-	Ball    *Ball     `json:"ball,omitempty"`
+	Line    *[]Dot    `json:"line,omitempty"`
+	Circle  *Circle   `json:"circle,omitempty"`
 	Status  *string   `json:"status,omitempty"`
 }

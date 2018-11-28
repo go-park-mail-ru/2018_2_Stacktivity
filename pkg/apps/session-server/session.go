@@ -41,7 +41,6 @@ func (sm *SessionManager) Create(ctx context.Context, in *session.Session) (*ses
 	if result != "OK" {
 		return nil, errors.New("result from redis is not OK: " + result)
 	}
-	log.Println(sessionID.ID)
 	return &sessionID, nil
 }
 

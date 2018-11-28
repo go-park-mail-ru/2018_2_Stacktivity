@@ -102,10 +102,6 @@ func getUserID(r *http.Request) int32 {
 	return r.Context().Value("userID").(int32)
 }
 
-func getSessionID(r *http.Request) string {
-	return r.Context().Value("sessionID").(string)
-}
-
 func getUser(r *http.Request) models.User {
 	return r.Context().Value("user").(models.User)
 }

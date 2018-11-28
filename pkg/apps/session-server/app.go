@@ -5,16 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"net"
-	"net/http"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
-
-type Server struct {
-	httpSrv *http.Server
-	log     *log.Logger
-}
 
 func StartApp() {
 	flag.Parse()

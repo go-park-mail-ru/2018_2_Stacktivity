@@ -1,12 +1,12 @@
 package public_api_server
 
 import (
-	"2018_2_Stacktivity/models"
 	"2018_2_Stacktivity/pkg/session"
 	"context"
-	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"strconv"
+
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/google/uuid"
 )
@@ -103,8 +103,4 @@ func getUserID(r *http.Request) int32 {
 
 func getSessionID(r *http.Request) string {
 	return r.Context().Value("sessionID").(string)
-}
-
-func getUser(r *http.Request) models.User {
-	return r.Context().Value("user").(models.User)
 }

@@ -107,7 +107,7 @@ func StartApp() {
 
 	go func() {
 		logger.Infof("Starting public-api-server on %s", config.Port)
-		if err := srv.httpSrv.ListenAndServe(); err != nil {
+		if err = srv.httpSrv.ListenAndServe(); err != nil {
 			log.Warnln(err)
 		}
 	}()
@@ -118,7 +118,9 @@ func StartApp() {
 	<-c
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	srv.httpSrv.Shutdown(ctx)
+	if err = srv.httpSrv.Shutdown(ctx); err != nil {
+		logger.Warnln("can't shutdown server")
+	}
 	log.Infoln("Shutdown public-api-server...")
 	os.Exit(0)
 }

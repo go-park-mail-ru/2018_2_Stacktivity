@@ -23,7 +23,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	if err := loginReq.UnmarshalJSON(body); err != nil {
+	if err = loginReq.UnmarshalJSON(body); err != nil {
 		srv.log.Warnln("can't unmarshal request", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -69,8 +69,12 @@ func (srv *Server) deleteSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
-	srv.sm.Delete(r.Context(), &session.SessionID{
+	_, err := srv.sm.Delete(r.Context(), &session.SessionID{
 		ID: getSessionID(r),
 	})
+	if err != nil {
+		srv.log.Println("can't delete session")
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	w.WriteHeader(http.StatusOK)
 }

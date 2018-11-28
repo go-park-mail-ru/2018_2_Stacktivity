@@ -109,10 +109,6 @@ func (s *UserStorage) GetByUsername(username string) (user models.User, has bool
 	return user, true, nil
 }
 
-var updateUser = `UPDATE "user" SET  = coalesce(coalesce(nullif($2, ''), username)), 
-			email = coalesce(coalesce(nullif($3, ''), email)), 
-			pass = coalesce(coalesce(nullif($4, ''), pass)) WHERE nickname = $1 RETURNING fullname, email, about;`
-
 func (s *UserStorage) UpdateUser(uid int32, user models.UserUpdate) (models.User, error) {
 	var newUser models.User
 	return newUser, nil

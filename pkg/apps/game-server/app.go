@@ -107,7 +107,9 @@ func StartApp() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	srv.game.Stop()
-	srv.httpSrv.Shutdown(ctx)
+	if err = srv.httpSrv.Shutdown(ctx); err != nil {
+		logger.Warnln("can't shutdown game-server")
+	}
 	log.Infoln("Shutdown public-api-server...")
 	os.Exit(0)
 }

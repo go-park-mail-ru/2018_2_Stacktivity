@@ -1,12 +1,14 @@
 package models
 
 type User struct {
-	ID       int32  `db:"uid" json:"id"`
-	Username string `db:"username" json:"username" `
-	Email    string `db:"email" json:"email"`
-	Password string `db:"pass" json:"-"`
-	Avatar   string `db:"avatar" json:"avatar,omitempty" `
-	Score    int    `db:"score" json:"score"`
+	ID        int32  `db:"uid" json:"id"`
+	Username  string `db:"username" json:"username" `
+	Email     string `db:"email" json:"email"`
+	Password  string `db:"pass" json:"-"`
+	Avatar    string `db:"avatar" json:"avatar,omitempty" `
+	Score     int    `db:"score" json:"score"`
+	Level     int    `db:"level" json:"level"`
+	FullLevel LevelInStorage
 }
 
 func NewUser(username string, email string, password string) User {

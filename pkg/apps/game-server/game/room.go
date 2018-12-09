@@ -2,6 +2,8 @@ package game
 
 import (
 	"2018_2_Stacktivity/models"
+	"2018_2_Stacktivity/storage"
+	"encoding/json"
 	"log"
 	"time"
 
@@ -18,7 +20,7 @@ type Room struct {
 	stopchanel chan interface{}
 }
 
-func NewRoom(players []*Player, rm *RoomManager) *Room {
+func NewRoom(players []*Player) *Room {
 	log.Println("creating game...")
 	return &Room{ID: uuid.New().String(),
 		players:    players,
@@ -46,12 +48,6 @@ func (r *Room) Start() {
 			go p.Listen()
 		}
 		go r.ListenToPlayers()
-	}
-
-	r.Ticker = time.NewTicker(time.Second)
-	for {
-		<-r.Ticker.C
-		// TODO add some work
 	}
 }
 
@@ -92,21 +88,23 @@ func (r *Room) ListenToPlayers() {
 				StartCurve(m.Message.Line)
 			case models.GetLevel:
 				log.Println("Get level ", m.Message.Level.LevelNumber)
+				var level models.Level
+
+				dbLevel, err := storage.GetUserStorage().GetLevelByNumber(m.Message.Level.LevelNumber)
+				if err != nil {
+					log.Println("PIZDA RULIU")
+					log.Println(err.Error())
+					return
+				}
+				if err := json.Unmarshal([]byte(dbLevel.Level), &level); err != nil {
+					log.Println(m.Player.user.FullLevel.Level)
+					log.Println("HUITA KAKAYA-TO")
+					log.Println(err.Error())
+					return
+				}
 				m.Player.Send(&models.Message{
 					Event: models.GetLevel,
-					Level: &models.Level{
-						LevelNumber: 0,
-						Circles: []models.Circle{
-							{
-								Number: 0,
-								X:      636,
-								Y:      360,
-								R:      80,
-								Type:   "goal",
-								Color:  "Blue",
-							},
-						},
-					},
+					Level: &level,
 				})
 			}
 		case p := <-r.Unregister:

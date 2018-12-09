@@ -7,6 +7,14 @@ import (
 func (srv *Server) CreateSinglePlayer(w http.ResponseWriter, r *http.Request) {
 	user := getUser(r)
 	conn, err := CreateConnection(w, r)
+	fullLevel, err := srv.users.GetLevelByNumber(user.Level)
+	if err != nil {
+		srv.log.Println("can't get user level", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	user.FullLevel = fullLevel
+
 	if err != nil {
 		srv.log.Println("can't create connection", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -19,6 +27,15 @@ func (srv *Server) CreateSinglePlayer(w http.ResponseWriter, r *http.Request) {
 func (srv *Server) CreatePlayer(w http.ResponseWriter, r *http.Request) {
 	println("func CreatePlayer")
 	user := getUser(r)
+
+	fullLevel, err := srv.users.GetLevelByNumber(user.Level)
+	if err != nil {
+		srv.log.Println("can't get user level", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	user.FullLevel = fullLevel
+
 	conn, err := CreateConnection(w, r)
 	if err != nil {
 		srv.log.Println("can't create connection", err)

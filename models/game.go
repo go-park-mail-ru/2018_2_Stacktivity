@@ -42,3 +42,8 @@ type Message struct {
 	Circle  *Circle   `json:"circle,omitempty"`
 	Status  *string   `json:"status,omitempty"`
 }
+
+type LevelInStorage struct {
+	Number int    `db:"number"`
+	Level  string `db:"level"`
+}

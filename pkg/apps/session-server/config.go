@@ -20,5 +20,5 @@ func init() {
 	flag.StringVar(&config.Port, "port", ":8081", "service port")
 	flag.DurationVar(&config.WriteTimeout, "write timeout", 15*time.Second, "timeout for write")
 	flag.DurationVar(&config.ReadTimeout, "read timeout", 15*time.Second, "timeout for read")
-	flag.StringVar(&config.RedisAddr, "redis addres", "redis://user:@localhost:6379/0", "redis addr")
+	flag.StringVar(&config.RedisAddr, "redis addres", "redis://user:@redis:6379/0", "redis addr")
 }

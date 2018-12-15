@@ -23,8 +23,8 @@ func init() {
 	flag.StringVar(&config.Port, "port", ":8083", "service port")
 	flag.DurationVar(&config.WriteTimeout, "write timeout", 15*time.Second, "timeout for write")
 	flag.DurationVar(&config.ReadTimeout, "read timeout", 15*time.Second, "timeout for read")
-	flag.StringVar(&config.DB, "database DSN", "user= password= dbname= sslmode=disable", "DSN for database")
+	flag.StringVar(&config.DB, "database DSN", "host=postgres user=docker password=docker dbname=docker sslmode=disable", "DSN for database")
 	flag.StringVar(&config.AllowedIP, "allowed IP", "http://blep.me", "IP for CORS")
 	flag.StringVar(&config.AllowedMethods, "allowed HTTP methods", "POST, GET, PUT, DELETE, OPTIONS", "HTTP methids for CORS")
-	flag.StringVar(&config.SessionAddr, "session addres", "127.0.0.1:8081", "addres of session microservice")
+	flag.StringVar(&config.SessionAddr, "session addres", "session:8081", "addres of session microservice")
 }

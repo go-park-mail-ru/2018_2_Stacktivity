@@ -1,0 +1,89 @@
+version: '3.1'
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+
+networks:
+  backend-services:
+
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: ./postgres.Dockerfile
+    networks:
+    - backend-services
+
+  redis:
+    image: redis:latest
+    networks:
+    - backend-services
+
+  prometheus:
+    image: prom/prometheus:v2.5.0
+    volumes:
+    - ./prometheus/:/etc/prometheus/
+    - prometheus_data:/prometheus
+    command:
+    - '--config.file=/etc/prometheus/prometheus.yml'
+    - '--storage.tsdb.path=/prometheus'
+    - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+    - '--web.console.templates=/usr/share/prometheus/consoles'
+    - '--web.external-url=http://95.163.212.75/prometheus'
+    - '--web.route-prefix="/"'
+    ports:
+    - 9090:9090
+    restart: always
+    networks:
+    - backend-services
+
+  public-api:
+    build:
+      context: ./bin
+      dockerfile: ../public-api.Dockerfile
+    depends_on:
+    - postgres
+    - session
+    ports:
+    - 8082:8082
+    restart: always
+    networks:
+    - backend-services
+
+  game:
+    build:
+      context: ./bin
+      dockerfile: ../game.Dockerfile
+    depends_on:
+    - public-api
+    ports:
+    - 8083:8083
+    restart: always
+    networks:
+    - backend-services
+
+  session:
+    build:
+      context: ./bin
+      dockerfile: ../session.Dockerfile
+    depends_on:
+    - redis
+    networks:
+    - backend-services
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    depends_on:
+    - prometheus
+    ports:
+    - 3000:3000
+    volumes:
+    - ./grafana/:/etc/grafana
+    - grafana_data:/var/lib/grafana
+    command:
+    - '--config=/etc/grafana/prometheus.yml'
+    restart: always
+    networks:
+    - backend-services

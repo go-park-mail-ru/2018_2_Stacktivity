@@ -89,7 +89,7 @@ services:
     - ./grafana/:/etc/grafana
     - grafana_data:/var/lib/grafana
     command:
-    - '--config=/etc/grafana/prometheus.yml'
+    - '--config=/etc/grafana/custom.ini'
     restart: always
     networks:
     - backend-services

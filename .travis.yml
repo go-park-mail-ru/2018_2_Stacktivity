@@ -1,15 +1,19 @@
 language: golang
 go:
-  - "1.x"
+- 1.x
 script:
-- ./make_bin.sh
+- "./make_bin.sh"
 - chmod 600 ./tp_blep
 - ssh-keyscan -H $blep_ip >> ~/.ssh/known_hosts
 - scp -i ./tp_blep -r bin *.Dockerfile docker-compose.yml grafana prometheus $blep_user@$blep_ip:/home/$blep_user/blep/back
 - scp -i ./tp_blep ./nginx.conf $blep_user@$blep_ip:/home/$blep_user/backend.conf
 - ssh -i ./tp_blep $blep_user@$blep_ip sudo mv /home/$blep_user/backend.conf /etc/nginx/conf.d/backend.conf
 - ssh -i ./tp_blep $blep_user@$blep_ip sudo nginx -s reload
-- ssh -i ./tp_blep $blep_user@$blep_ip cd /home/$blep_user/blep/back/ && sudo docker-compose build && sudo docker-compose restart
+- ssh -i ./tp_blep $blep_user@$blep_ip cd /home/$blep_user/blep/back/ && sudo docker-compose
+  build && sudo docker-compose restart
 branches:
   only:
   - master
+before_install:
+- openssl aes-256-cbc -K $encrypted_5afbc0103609_key -iv $encrypted_5afbc0103609_iv
+  -in tp_blep.enc -out ./tp_blep -d

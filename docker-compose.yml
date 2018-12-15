@@ -8,6 +8,19 @@ networks:
   backend-services:
 
 services:
+  postgres:
+    image: library/postgres
+    restart: unless-stopped
+    ports:
+    - "5432:5432"
+    environment:
+      LC_ALL: C.UTF-8
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: docker
+    networks:
+    - backend-services
+
   redis:
     image: redis:latest
     networks:

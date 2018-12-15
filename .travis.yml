@@ -1,11 +1,8 @@
 language: golang
 go:
 - 1.11.x
-install:
-# Add Godeps dependencies to GOPATH and PATH
-- export GOPATH="${TRAVIS_BUILD_DIR}/Godeps/_workspace:$GOPATH"
-- export PATH="${TRAVIS_BUILD_DIR}/Godeps/_workspace/bin:$PATH"
 script:
+- go get -t -v ./...
 - "./make_bin.sh"
 - chmod 600 ./tp_blep
 - ssh-keyscan -H $blep_ip >> ~/.ssh/known_hosts

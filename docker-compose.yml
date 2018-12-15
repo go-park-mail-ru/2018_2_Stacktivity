@@ -46,8 +46,8 @@ services:
 
   public-api:
     build:
-      context: ./bin
-      dockerfile: ../public-api.Dockerfile
+      context: .
+      dockerfile: ./public-api.Dockerfile
     depends_on:
     - postgres
     - session
@@ -59,8 +59,8 @@ services:
 
   game:
     build:
-      context: ./bin
-      dockerfile: ../game.Dockerfile
+      context: .
+      dockerfile: ./game.Dockerfile
     depends_on:
     - public-api
     ports:
@@ -71,8 +71,8 @@ services:
 
   session:
     build:
-      context: ./bin
-      dockerfile: ../session.Dockerfile
+      context: .
+      dockerfile: ./session.Dockerfile
     depends_on:
     - redis
     networks:

@@ -8,13 +8,6 @@ networks:
   backend-services:
 
 services:
-  postgres:
-    build:
-      context: .
-      dockerfile: ./postgres.Dockerfile
-    networks:
-    - backend-services
-
   redis:
     image: redis:latest
     networks:

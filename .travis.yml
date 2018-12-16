@@ -1,9 +1,19 @@
+sudo: false
+
 language: go
+
 go:
 - 1.11.x
-install:
-  - echo $GOPATH
+
+install: true
+
+git:
+  depth: 1
+
 script:
+- go get -u github.com/alecthomas/gometalinter
+- gometalinter --install
+- gometalinter ./...
 - mkdir $GOPATH/src/2018_2_Stacktivity && cp -r . $GOPATH/src/2018_2_Stacktivity && cd $GOPATH/src/2018_2_Stacktivity
 - chmod 777 "./make_bin.sh"
 - ./make_bin.sh
@@ -13,9 +23,11 @@ script:
 - scp -i ./tp_blep ./nginx.conf $blep_user@$blep_ip:/home/$blep_user/backend.conf
 - ssh -i ./tp_blep $blep_user@$blep_ip chmod 0777 /home/$blep_user/blep/back/deploy.sh
 - ssh -i ./tp_blep $blep_user@$blep_ip /home/$blep_user/blep/back/deploy.sh
+
 branches:
   only:
   - master
+
 before_install:
 - openssl aes-256-cbc -K $encrypted_5afbc0103609_key -iv $encrypted_5afbc0103609_iv
   -in tp_blep.enc -out ./tp_blep -d

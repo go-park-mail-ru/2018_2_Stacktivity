@@ -13,7 +13,7 @@ git:
 script:
 - go get -u github.com/alecthomas/gometalinter
 - gometalinter --install
-- gometalinter ./...
+- gometalinter --vendor ./...
 - mkdir $GOPATH/src/2018_2_Stacktivity && cp -r . $GOPATH/src/2018_2_Stacktivity && cd $GOPATH/src/2018_2_Stacktivity
 - chmod 777 "./make_bin.sh"
 - ./make_bin.sh

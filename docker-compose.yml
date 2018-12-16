@@ -11,6 +11,8 @@ services:
   postgres:
     image: library/postgres
     restart: unless-stopped
+    volumes:
+    - pgdata:/var/lib/postgresql/data
     environment:
       LC_ALL: C.UTF-8
       POSTGRES_USER: docker

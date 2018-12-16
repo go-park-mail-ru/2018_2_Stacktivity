@@ -11,8 +11,6 @@ services:
   postgres:
     image: library/postgres
     restart: unless-stopped
-    ports:
-    - "5432:5432"
     environment:
       LC_ALL: C.UTF-8
       POSTGRES_USER: docker
@@ -37,7 +35,6 @@ services:
     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
     - '--web.console.templates=/usr/share/prometheus/consoles'
     - '--web.external-url=http://95.163.212.75/prometheus'
-    - '--web.route-prefix="/"'
     ports:
     - 9090:9090
     restart: always

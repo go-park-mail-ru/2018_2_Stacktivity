@@ -19,7 +19,7 @@ rule_files:
 scrape_configs:
 - job_name: 'prometheus'
   static_configs:
-  - targets: ['localhost:9090']
+  - targets: ['http://95.163.212.75/prometheus/']
 
 - job_name: 'grafana'
   static_configs:

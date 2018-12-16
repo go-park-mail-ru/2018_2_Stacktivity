@@ -9,11 +9,11 @@ script:
 - ./make_bin.sh
 - chmod 600 ./tp_blep
 - ssh-keyscan -H $blep_ip >> ~/.ssh/known_hosts
-- scp -i ./tp_blep -r bin *.Dockerfile docker-compose.yml grafana prometheus $blep_user@$blep_ip:/home/$blep_user/blep/back
+- scp -i ./tp_blep -r bin *.Dockerfile docker-compose.yml grafana prometheus $blep_user@$blep_ip:/home/$blep_user/blep/back/
 - scp -i ./tp_blep ./nginx.conf $blep_user@$blep_ip:/home/$blep_user/backend.conf
 - ssh -i ./tp_blep $blep_user@$blep_ip sudo mv /home/$blep_user/backend.conf /etc/nginx/conf.d/backend.conf
 - ssh -i ./tp_blep $blep_user@$blep_ip sudo nginx -s reload
-- ssh -i ./tp_blep $blep_user@$blep_ip cd /home/$blep_user/blep/back/ && sudo docker-compose
+- ssh -i ./tp_blep $blep_user@$blep_ip cd /home/$blep_user/blep/back && pwd && sudo docker-compose
   build && sudo docker-compose restart
 branches:
   only:

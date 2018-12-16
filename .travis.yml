@@ -4,7 +4,7 @@ go:
 install:
   - echo $GOPATH
 script:
-- mkdir $GOPATH/src/2018_2_Stacktivity && cp ./* $GOPATH/src/2018_2_Stacktivity && cd $GOPATH/src/2018_2_Stacktivity
+- mkdir $GOPATH/src/2018_2_Stacktivity && cp -r . $GOPATH/src/2018_2_Stacktivity && cd $GOPATH/src/2018_2_Stacktivity
 - chmod 777 "./make_bin.sh"
 - ./make_bin.sh
 - chmod 600 ./tp_blep

@@ -27,7 +27,7 @@ func init() {
 	flag.DurationVar(&config.ReadTimeout, "read timeout", 15*time.Second, "timeout for read")
 	flag.StringVar(&config.DB, "database DSN", "host=postgres user=docker password=docker dbname=docker sslmode=disable", "DSN for database")
 	flag.StringVar(&config.APIPrefix, "prefix URL for API", "/api/v1", "URL for requests for API")
-	flag.StringVar(&config.AllowedIP, "allowed IP", "http://blep.me", "IP for CORS")
+	flag.StringVar(&config.AllowedIP, "allowed IP", "https://blep.me", "IP for CORS")
 	flag.StringVar(&config.AllowedMethods, "allowed HTTP methods", "POST, GET, PUT, DELETE, OPTIONS", "HTTP methids for CORS")
 	flag.StringVar(&config.PathToOpenAPI, "path to OpenAPI", "$GOPATH/src/2018_2_Stacktivity/docs/swagger/html-client", "path for returning OpenAPI")
 	flag.StringVar(&config.SessionAddr, "session addres", "session:8081", "addres of session microservice")

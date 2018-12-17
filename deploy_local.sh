@@ -13,6 +13,8 @@
 # please do not rename directory of project, or you will have to change 2018_2_stacktivity_postgres_1
 # to whatever your docker-compose will choose as the name of postgres container
 
+sudo chmod 0777 ./make_bin.sh
+./make_bin.sh
 sudo docker-compose up -d
 sudo docker cp storage/migrations/1_create_user_table.up.sql 2018_2_stacktivity_postgres_1:/var/
 sudo docker exec 2018_2_stacktivity_postgres_1 useradd docker

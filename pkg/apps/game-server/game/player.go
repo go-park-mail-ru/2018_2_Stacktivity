@@ -2,6 +2,8 @@ package game
 
 import (
 	"2018_2_Stacktivity/models"
+	"2018_2_Stacktivity/storage"
+	"encoding/json"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -12,6 +14,7 @@ type Player struct {
 	enemy *Player
 	room  *Room
 	conn  *websocket.Conn
+	logic models.PlayerLogic
 }
 
 type IncomingMessage struct {
@@ -52,9 +55,26 @@ func (p *Player) StartMultiplayer() {
 	players := make([]string, 2)
 	players[0] = p.user.Username
 	players[1] = p.enemy.user.Username
+
+	log.Println("Get level ", p.room.levelNum)
+	var level models.Level
+
+	dbLevel, err := storage.GetUserStorage().GetLevelByNumber(p.room.levelNum)
+	if err != nil {
+		log.Println("PIZDA RULIU")
+		log.Println(err.Error())
+		return
+	}
+	if err := json.Unmarshal([]byte(dbLevel.Level), &level); err != nil {
+		log.Println("HUITA KAKAYA-TO")
+		log.Println(err.Error())
+		return
+	}
+
 	m := &models.Message{
 		Event:   models.StartGame,
 		Players: &players,
+		Level:   &level,
 	}
 	p.Send(m)
 }

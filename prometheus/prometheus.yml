@@ -19,8 +19,9 @@ rule_files:
 scrape_configs:
 - job_name: 'prometheus'
   metrics_path: /prometheus/metrics
+  scheme: https
   static_configs:
-  - targets: ['95.163.212.75']
+  - targets: ['blep.me']
 
 
 - job_name: 'grafana'

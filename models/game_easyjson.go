@@ -17,7 +17,149 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson85f0d656Decode20182StacktivityModels(in *jlexer.Lexer, out *Message) {
+func easyjson85f0d656Decode20182StacktivityModels(in *jlexer.Lexer, out *PlayerLogic) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson85f0d656Encode20182StacktivityModels(out *jwriter.Writer, in PlayerLogic) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v PlayerLogic) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson85f0d656Encode20182StacktivityModels(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v PlayerLogic) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson85f0d656Encode20182StacktivityModels(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *PlayerLogic) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson85f0d656Decode20182StacktivityModels(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *PlayerLogic) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson85f0d656Decode20182StacktivityModels(l, v)
+}
+func easyjson85f0d656Decode20182StacktivityModels1(in *jlexer.Lexer, out *LevelInStorage) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "Number":
+			out.Number = int(in.Int())
+		case "Level":
+			out.Level = string(in.String())
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson85f0d656Encode20182StacktivityModels1(out *jwriter.Writer, in LevelInStorage) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"Number\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Int(int(in.Number))
+	}
+	{
+		const prefix string = ",\"Level\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.String(string(in.Level))
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v LevelInStorage) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson85f0d656Encode20182StacktivityModels1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v LevelInStorage) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson85f0d656Encode20182StacktivityModels1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *LevelInStorage) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson85f0d656Decode20182StacktivityModels1(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *LevelInStorage) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson85f0d656Decode20182StacktivityModels1(l, v)
+}
+func easyjson85f0d656Decode20182StacktivityModels2(in *jlexer.Lexer, out *Message) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -87,31 +229,10 @@ func easyjson85f0d656Decode20182StacktivityModels(in *jlexer.Lexer, out *Message
 				out.Line = nil
 			} else {
 				if out.Line == nil {
-					out.Line = new([]Dot)
+					out.Line = new(BaseLine)
 				}
-				if in.IsNull() {
-					in.Skip()
-					*out.Line = nil
-				} else {
-					in.Delim('[')
-					if *out.Line == nil {
-						if !in.IsDelim(']') {
-							*out.Line = make([]Dot, 0, 4)
-						} else {
-							*out.Line = []Dot{}
-						}
-					} else {
-						*out.Line = (*out.Line)[:0]
-					}
-					for !in.IsDelim(']') {
-						var v2 Dot
-						if data := in.Raw(); in.Ok() {
-							in.AddError((v2).UnmarshalJSON(data))
-						}
-						*out.Line = append(*out.Line, v2)
-						in.WantComma()
-					}
-					in.Delim(']')
+				if data := in.Raw(); in.Ok() {
+					in.AddError((*out.Line).UnmarshalJSON(data))
 				}
 			}
 		case "circle":
@@ -146,7 +267,7 @@ func easyjson85f0d656Decode20182StacktivityModels(in *jlexer.Lexer, out *Message
 		in.Consumed()
 	}
 }
-func easyjson85f0d656Encode20182StacktivityModels(out *jwriter.Writer, in Message) {
+func easyjson85f0d656Encode20182StacktivityModels2(out *jwriter.Writer, in Message) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -172,11 +293,11 @@ func easyjson85f0d656Encode20182StacktivityModels(out *jwriter.Writer, in Messag
 			out.RawString("null")
 		} else {
 			out.RawByte('[')
-			for v3, v4 := range *in.Players {
-				if v3 > 0 {
+			for v2, v3 := range *in.Players {
+				if v2 > 0 {
 					out.RawByte(',')
 				}
-				out.String(string(v4))
+				out.String(string(v3))
 			}
 			out.RawByte(']')
 		}
@@ -199,18 +320,7 @@ func easyjson85f0d656Encode20182StacktivityModels(out *jwriter.Writer, in Messag
 		} else {
 			out.RawString(prefix)
 		}
-		if *in.Line == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
-			out.RawString("null")
-		} else {
-			out.RawByte('[')
-			for v5, v6 := range *in.Line {
-				if v5 > 0 {
-					out.RawByte(',')
-				}
-				out.Raw((v6).MarshalJSON())
-			}
-			out.RawByte(']')
-		}
+		out.Raw((*in.Line).MarshalJSON())
 	}
 	if in.Circle != nil {
 		const prefix string = ",\"circle\":"
@@ -238,27 +348,146 @@ func easyjson85f0d656Encode20182StacktivityModels(out *jwriter.Writer, in Messag
 // MarshalJSON supports json.Marshaler interface
 func (v Message) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson85f0d656Encode20182StacktivityModels(&w, v)
+	easyjson85f0d656Encode20182StacktivityModels2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Message) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson85f0d656Encode20182StacktivityModels(w, v)
+	easyjson85f0d656Encode20182StacktivityModels2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Message) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson85f0d656Decode20182StacktivityModels(&r, v)
+	easyjson85f0d656Decode20182StacktivityModels2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Message) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson85f0d656Decode20182StacktivityModels(l, v)
+	easyjson85f0d656Decode20182StacktivityModels2(l, v)
 }
-func easyjson85f0d656Decode20182StacktivityModels1(in *jlexer.Lexer, out *Dot) {
+func easyjson85f0d656Decode20182StacktivityModels3(in *jlexer.Lexer, out *BaseLine) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeString()
+		in.WantColon()
+		if in.IsNull() {
+			in.Skip()
+			in.WantComma()
+			continue
+		}
+		switch key {
+		case "points":
+			if in.IsNull() {
+				in.Skip()
+				out.Dots = nil
+			} else {
+				in.Delim('[')
+				if out.Dots == nil {
+					if !in.IsDelim(']') {
+						out.Dots = make([]Dot, 0, 4)
+					} else {
+						out.Dots = []Dot{}
+					}
+				} else {
+					out.Dots = (out.Dots)[:0]
+				}
+				for !in.IsDelim(']') {
+					var v4 Dot
+					if data := in.Raw(); in.Ok() {
+						in.AddError((v4).UnmarshalJSON(data))
+					}
+					out.Dots = append(out.Dots, v4)
+					in.WantComma()
+				}
+				in.Delim(']')
+			}
+		case "base_point":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.BaseDot).UnmarshalJSON(data))
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson85f0d656Encode20182StacktivityModels3(out *jwriter.Writer, in BaseLine) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"points\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		if in.Dots == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+			out.RawString("null")
+		} else {
+			out.RawByte('[')
+			for v5, v6 := range in.Dots {
+				if v5 > 0 {
+					out.RawByte(',')
+				}
+				out.Raw((v6).MarshalJSON())
+			}
+			out.RawByte(']')
+		}
+	}
+	{
+		const prefix string = ",\"base_point\":"
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
+		out.Raw((in.BaseDot).MarshalJSON())
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v BaseLine) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson85f0d656Encode20182StacktivityModels3(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v BaseLine) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson85f0d656Encode20182StacktivityModels3(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *BaseLine) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson85f0d656Decode20182StacktivityModels3(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *BaseLine) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson85f0d656Decode20182StacktivityModels3(l, v)
+}
+func easyjson85f0d656Decode20182StacktivityModels4(in *jlexer.Lexer, out *Dot) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -291,7 +520,7 @@ func easyjson85f0d656Decode20182StacktivityModels1(in *jlexer.Lexer, out *Dot) {
 		in.Consumed()
 	}
 }
-func easyjson85f0d656Encode20182StacktivityModels1(out *jwriter.Writer, in Dot) {
+func easyjson85f0d656Encode20182StacktivityModels4(out *jwriter.Writer, in Dot) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -321,27 +550,27 @@ func easyjson85f0d656Encode20182StacktivityModels1(out *jwriter.Writer, in Dot) 
 // MarshalJSON supports json.Marshaler interface
 func (v Dot) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson85f0d656Encode20182StacktivityModels1(&w, v)
+	easyjson85f0d656Encode20182StacktivityModels4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Dot) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson85f0d656Encode20182StacktivityModels1(w, v)
+	easyjson85f0d656Encode20182StacktivityModels4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Dot) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson85f0d656Decode20182StacktivityModels1(&r, v)
+	easyjson85f0d656Decode20182StacktivityModels4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Dot) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson85f0d656Decode20182StacktivityModels1(l, v)
+	easyjson85f0d656Decode20182StacktivityModels4(l, v)
 }
-func easyjson85f0d656Decode20182StacktivityModels2(in *jlexer.Lexer, out *Level) {
+func easyjson85f0d656Decode20182StacktivityModels5(in *jlexer.Lexer, out *Level) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -397,7 +626,7 @@ func easyjson85f0d656Decode20182StacktivityModels2(in *jlexer.Lexer, out *Level)
 		in.Consumed()
 	}
 }
-func easyjson85f0d656Encode20182StacktivityModels2(out *jwriter.Writer, in Level) {
+func easyjson85f0d656Encode20182StacktivityModels5(out *jwriter.Writer, in Level) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -436,27 +665,27 @@ func easyjson85f0d656Encode20182StacktivityModels2(out *jwriter.Writer, in Level
 // MarshalJSON supports json.Marshaler interface
 func (v Level) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson85f0d656Encode20182StacktivityModels2(&w, v)
+	easyjson85f0d656Encode20182StacktivityModels5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Level) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson85f0d656Encode20182StacktivityModels2(w, v)
+	easyjson85f0d656Encode20182StacktivityModels5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Level) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson85f0d656Decode20182StacktivityModels2(&r, v)
+	easyjson85f0d656Decode20182StacktivityModels5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Level) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson85f0d656Decode20182StacktivityModels2(l, v)
+	easyjson85f0d656Decode20182StacktivityModels5(l, v)
 }
-func easyjson85f0d656Decode20182StacktivityModels3(in *jlexer.Lexer, out *Circle) {
+func easyjson85f0d656Decode20182StacktivityModels6(in *jlexer.Lexer, out *Circle) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -497,7 +726,7 @@ func easyjson85f0d656Decode20182StacktivityModels3(in *jlexer.Lexer, out *Circle
 		in.Consumed()
 	}
 }
-func easyjson85f0d656Encode20182StacktivityModels3(out *jwriter.Writer, in Circle) {
+func easyjson85f0d656Encode20182StacktivityModels6(out *jwriter.Writer, in Circle) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -567,23 +796,23 @@ func easyjson85f0d656Encode20182StacktivityModels3(out *jwriter.Writer, in Circl
 // MarshalJSON supports json.Marshaler interface
 func (v Circle) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson85f0d656Encode20182StacktivityModels3(&w, v)
+	easyjson85f0d656Encode20182StacktivityModels6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Circle) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson85f0d656Encode20182StacktivityModels3(w, v)
+	easyjson85f0d656Encode20182StacktivityModels6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Circle) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson85f0d656Decode20182StacktivityModels3(&r, v)
+	easyjson85f0d656Decode20182StacktivityModels6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Circle) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson85f0d656Decode20182StacktivityModels3(l, v)
+	easyjson85f0d656Decode20182StacktivityModels6(l, v)
 }

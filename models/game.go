@@ -11,6 +11,14 @@ var (
 	EndGame       = 8
 	Close         = 9
 	GetLevel      = 10
+	DataLoaded    = 11
+	StartInput    = 12
+	FinishInput   = 13
+	LineInputted  = 14
+	GameProcess   = 15
+	GameFinish    = 16
+	PlayerSuccess = 17
+	PlayerFailure = 18
 	StatusSuccess = "success"
 	StatusFailure = "failure"
 )
@@ -34,11 +42,27 @@ type Dot struct {
 	Y int `json:"y"`
 }
 
+type BaseLine struct {
+	Dots    []Dot `json:"points"`
+	BaseDot Dot   `json:"base_point"`
+}
+
 type Message struct {
 	Event   int       `json:"event"`
 	Players *[]string `json:"players,omitempty"`
 	Level   *Level    `json:"level,omitempty"`
-	Line    *[]Dot    `json:"line,omitempty"`
+	Line    *BaseLine `json:"line,omitempty"`
 	Circle  *Circle   `json:"circle,omitempty"`
 	Status  *string   `json:"status,omitempty"`
+}
+
+type LevelInStorage struct {
+	Number int    `db:"number"`
+	Level  string `db:"level"`
+}
+
+type PlayerLogic struct {
+	Line      *BaseLine
+	IsReady   bool
+	IsFailure bool
 }

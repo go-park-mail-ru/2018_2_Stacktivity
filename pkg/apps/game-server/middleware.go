@@ -2,10 +2,10 @@ package game_server
 
 import (
 	"2018_2_Stacktivity/models"
+	"2018_2_Stacktivity/pkg/responses"
 	"2018_2_Stacktivity/pkg/session"
 	"context"
 	"log"
-
 	"net/http"
 
 	"github.com/google/uuid"
@@ -35,11 +35,12 @@ func (srv *Server) authMiddleware(next http.Handler) http.Handler {
 			var sess *session.Session
 			var id uuid.UUID
 			ctx := r.Context()
-			s, err := r.Cookie("session-server-id")
+			value, err := responses.GetValueFromCookie(r, "session-server-id")
+			println("value: " + value)
 			if err == http.ErrNoCookie {
 				isAuth = false
 			} else {
-				id, err = uuid.Parse(s.Value)
+				id, err = uuid.Parse(value)
 				if err != nil {
 					srv.log.Warnln("can't parse ")
 					ctx = context.WithValue(ctx, "isAuth", false)

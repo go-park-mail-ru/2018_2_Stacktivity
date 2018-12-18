@@ -50,7 +50,7 @@ func (srv *Server) createSession(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	responses.WriteCookie(w, "session-server-id", sess.ID, time.Now().Add(7*24*time.Hour))
+	responses.WriteCookie(w, "sessionID", sess.ID, time.Now().Add(7*24*time.Hour))
 	responses.Write(w, http.StatusCreated, user)
 }
 

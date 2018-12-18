@@ -20,7 +20,6 @@ script:
 - chmod 600 ./tp_blep
 - ssh-keyscan -H $blep_ip >> ~/.ssh/known_hosts
 - scp -i ./tp_blep -r bin *.Dockerfile docker-compose.yml grafana prometheus deploy.sh $blep_user@$blep_ip:/home/$blep_user/blep/back/
-- scp -i ./tp_blep ./nginx.conf $blep_user@$blep_ip:/home/$blep_user/backend.conf
 - ssh -i ./tp_blep $blep_user@$blep_ip chmod 0777 /home/$blep_user/blep/back/deploy.sh
 - ssh -i ./tp_blep $blep_user@$blep_ip /home/$blep_user/blep/back/deploy.sh
 

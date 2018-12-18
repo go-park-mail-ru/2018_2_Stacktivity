@@ -11,10 +11,9 @@ git:
   depth: 1
 
 script:
-- go get -u github.com/alecthomas/gometalinter
-- gometalinter --install
-- gometalinter --vendor ./...
+- curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $GOPATH/bin v1.12.3
 - mkdir $GOPATH/src/2018_2_Stacktivity && cp -r . $GOPATH/src/2018_2_Stacktivity && cd $GOPATH/src/2018_2_Stacktivity
+- golangci-lint run
 - chmod 777 "./make_bin.sh"
 - ./make_bin.sh
 - chmod 600 ./tp_blep

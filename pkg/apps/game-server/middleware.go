@@ -35,8 +35,7 @@ func (srv *Server) authMiddleware(next http.Handler) http.Handler {
 			var sess *session.Session
 			var id uuid.UUID
 			ctx := r.Context()
-			value, err := responses.GetValueFromCookie(r, "session-server-id")
-			println("value: " + value)
+			value, err := responses.GetValueFromCookie(r, "sessionID")
 			if err == http.ErrNoCookie {
 				isAuth = false
 			} else {

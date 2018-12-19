@@ -94,16 +94,16 @@ func (bl BaseLine) Size() int {
 	return len(bl.Dots)
 }
 
+func (bl BaseLine) CopyDots() []Dot {
+	dots := make([]Dot, bl.Size())
+	copy(bl.Dots, dots)
+	return dots
+}
+
 func (bl BaseLine) Copy(dest *BaseLine) {
 	dest.CurrentPosition = bl.CurrentPosition
 	dest.BaseDot = bl.BaseDot
-
-	dest.Dots = make([]Dot, len(bl.Dots))
-	copy(bl.Dots, dest.Dots)
-}
-
-func (bl BaseLine) CopyDots() []Dot {
-	return []Dot{}
+	dest.Dots = bl.CopyDots()
 }
 
 func (bl BaseLine) GetAbsoluteDot(index int) (Dot, error) {
@@ -135,8 +135,12 @@ func (l *Line) Step() bool {
 }
 
 func (l *Line) constructEndLine() {
-	//var dots []Dot
-	//l.OriginLine.Copy(&dots)
+	dots := l.OriginLine.CopyDots()
+	if l.IsReversed {
+		for i := 0; i < len(dots); i++ {
+			dots[i].X = -dots[i].X
+		}
+	}
 
 }
 

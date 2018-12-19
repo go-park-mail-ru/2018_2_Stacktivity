@@ -78,15 +78,15 @@ func (r *Room) ListenToPlayers() {
 			switch m.Message.Event {
 			case models.UpdateCurv:
 				log.Println("Update curv")
-				if CheckCurve() {
-					UpdateCurve()
-					if len(r.players) == 2 {
-						m.Player.enemy.Send(m.Message)
-					}
-
-				} else {
-					r.Broadcast <- &models.Message{Event: models.InvalidDrop}
-				}
+				//if CheckCurve() {
+				//	UpdateCurve()
+				//	if len(r.players) == 2 {
+				//		m.Player.enemy.Send(m.Message)
+				//	}
+				//
+				//} else {
+				//	r.Broadcast <- &models.Message{Event: models.InvalidDrop}
+				//}
 			case models.EndCurv:
 				log.Println("End curv")
 				if len(r.players) == 2 {
@@ -123,7 +123,7 @@ func (r *Room) ListenToPlayers() {
 					//TODO replace in gorutine
 					r.Broadcast <- &models.Message{Event: models.StartInput}
 
-					waiting := time.NewTimer(time.Second * 15)
+					waiting := time.NewTimer(time.Second * 10)
 					<-waiting.C
 					r.Broadcast <- &models.Message{Event: models.FinishInput}
 				}
@@ -132,8 +132,10 @@ func (r *Room) ListenToPlayers() {
 				m.Player.logic.Line = m.Message.Line
 
 				if m.Player.enemy.logic.IsReady {
-
 					if m.Player.logic.Line != nil || m.Player.enemy.logic.Line != nil {
+						m.Player.logic.IsReady = false
+						m.Player.enemy.logic.IsReady = false
+
 						r.players[0].Send(&models.Message{Event: models.GameProcess,
 							Line: r.players[1].logic.Line})
 						r.players[1].Send(&models.Message{Event: models.GameProcess,
@@ -144,7 +146,7 @@ func (r *Room) ListenToPlayers() {
 
 						r.Broadcast <- &models.Message{Event: models.StartInput}
 
-						waiting := time.NewTimer(time.Second * 15)
+						waiting := time.NewTimer(time.Second * 10)
 						<-waiting.C
 						r.Broadcast <- &models.Message{Event: models.FinishInput}
 					}
@@ -156,9 +158,12 @@ func (r *Room) ListenToPlayers() {
 					m.Player.logic.IsFailure = false
 					m.Player.enemy.logic.IsFailure = false
 
+					m.Player.logic.Line = nil
+					m.Player.logic.Line = nil
+
 					r.Broadcast <- &models.Message{Event: models.StartInput}
 
-					waiting := time.NewTimer(time.Second * 15)
+					waiting := time.NewTimer(time.Second * 10)
 					<-waiting.C
 					r.Broadcast <- &models.Message{Event: models.FinishInput}
 				}

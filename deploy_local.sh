@@ -17,5 +17,9 @@ sudo chmod 0777 ./make_bin.sh
 ./make_bin.sh
 sudo docker-compose up -d
 sudo docker cp storage/migrations/1_create_user_table.up.sql 2018_2_stacktivity_postgres_1:/var/
+sudo docker cp storage/migrations/create_default_mult_levels.sql 2018_2_stacktivity_postgres_1:/var/
+sudo docker cp storage/migrations/insert_levels.sql 2018_2_stacktivity_postgres_1:/var/
 sudo docker exec 2018_2_stacktivity_postgres_1 useradd docker
 sudo docker exec 2018_2_stacktivity_postgres_1 su docker -c "psql -d docker -a -f /var/1_create_user_table.up.sql"
+sudo docker exec 2018_2_stacktivity_postgres_1 su docker -c "psql -d docker -a -f /var/create_default_mult_levels.sql"
+sudo docker exec 2018_2_stacktivity_postgres_1 su docker -c "psql -d docker -a -f /var/insert_levels.sql"

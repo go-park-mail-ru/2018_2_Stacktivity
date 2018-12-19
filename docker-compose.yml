@@ -38,7 +38,7 @@ services:
     - '--storage.tsdb.path=/prometheus'
     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
     - '--web.console.templates=/usr/share/prometheus/consoles'
-    - '--web.external-url=http://95.163.212.75/prometheus'
+    - '--web.external-url=https://blep.me/prometheus'
     ports:
     - 9090:9090
     restart: always

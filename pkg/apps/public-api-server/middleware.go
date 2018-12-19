@@ -19,6 +19,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Methods", config.AllowedMethods)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			w.Header().Set("X-Vasily", "48")
 
 			if r.Method == http.MethodOptions {
 				w.WriteHeader(http.StatusOK)

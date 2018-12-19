@@ -7,6 +7,11 @@ import (
 func (srv *Server) CreateSinglePlayer(w http.ResponseWriter, r *http.Request) {
 	user := getUser(r)
 	conn, err := CreateConnection(w, r)
+	if err != nil {
+		srv.log.Println("can't create connection", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	fullLevel, err := srv.users.GetLevelByNumber(user.Level)
 	if err != nil {
 		srv.log.Println("can't get user level", err)

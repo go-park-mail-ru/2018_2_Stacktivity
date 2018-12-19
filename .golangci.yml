@@ -62,26 +62,16 @@ linters-settings:
   govet:
     # report about shadowed variables
     check-shadowing: true
-
-    # Obtain type information from installed (to $GOPATH/pkg) package files:
-    # golangci-lint will execute `go install -i` and `go test -i` for analyzed packages
-    # before analyzing them.
-    # By default this option is disabled and govet gets type information by loader from source code.
-    # Loading from source code is slow, but it's done only once for all linters.
-    # Go-installing of packages first time is much slower than loading them from source code,
-    # therefore this option is disabled by default.
-    # But repeated installation is fast in go >= 1.10 because of build caching.
-    # Enable this option only if all conditions are met:
-    #  1. you use only "fast" linters (--fast e.g.): no program loading occurs
-    #  2. you use go >= 1.10
-    #  3. you do repeated runs (false for CI) or cache $GOPATH/pkg or `go env GOCACHE` dir in CI.
-    use-installed-packages: false
   golint:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0.8
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
+  goimports:
+    # put imports beginning with prefix after 3rd-party packages;
+    # it's a comma-separated list of prefixes
+    local-prefixes: github.com/org/project
   gocyclo:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 10
@@ -140,16 +130,34 @@ linters-settings:
     simple: true
     range-loops: true # Report preallocation suggestions on range loops, true by default
     for-loops: false # Report preallocation suggestions on for loops, false by default
-
+  gocritic:
+    # which checks should be enabled; can't be combined with 'disabled-checks';
+    # default are: [appendAssign assignOp caseOrder dupArg dupBranchBody dupCase flagDeref
+    # ifElseChain regexpMust singleCaseSwitch sloppyLen switchTrue typeSwitchVar underef
+    # unlambda unslice rangeValCopy defaultCaseOrder];
+    # all checks list: https://github.com/go-critic/checkers
+    enabled-checks:
+      - rangeValCopy
+    # which checks should be disabled; can't be combined with 'enabled-checks'; default is empty
+    disabled-checks:
+      - regexpMust
+    settings: # settings passed to gocritic
+      captLocal: # must be valid enabled check name
+        checkLocals: true
+      rangeValCopy:
+        sizeThreshold: 32
 
 linters:
   enable:
     - megacheck
-    - govet
   enable-all: false
   disable:
+    - gas
+    - govet
     - maligned
     - prealloc
+    - errcheck
+    - ineffassign
   disable-all: false
   presets:
     - bugs
@@ -175,7 +183,7 @@ issues:
   max-per-linter: 0
 
   # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
-  max-same: 0
+  max-same-issues: 0
 
   # Show only new issues: if there are unstaged changes or untracked files,
   # only those changes are analyzed, else only changes in HEAD~ are analyzed.
@@ -184,9 +192,3 @@ issues:
   # of integration: much better don't allow issues in new code.
   # Default is false.
   new: false
-
-  # Show only new issues created after git revision `REV`
-  new-from-rev: REV
-
-  # Show only new issues created in git patch with set file path.
-  new-from-patch: path/to/patch/file

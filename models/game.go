@@ -134,15 +134,15 @@ func (l *Line) Step() bool {
 	return !l.isLineOutOfWindow()
 }
 
-func (l *Line) constructEndLine() {
-	dots := l.OriginLine.CopyDots()
-	if l.IsReversed {
-		for i := 0; i < len(dots); i++ {
-			dots[i].X = -dots[i].X
-		}
-	}
-
-}
+//func (l *Line) constructEndLine() {
+//	dots := l.OriginLine.CopyDots()
+//	if l.IsReversed {
+//		for i := 0; i < len(dots); i++ {
+//			dots[i].X = -dots[i].X
+//		}
+//	}
+//
+//}
 
 func (l Line) isLineOutOfWindow() bool {
 	var isOut = true

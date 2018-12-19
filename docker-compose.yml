@@ -27,6 +27,10 @@ services:
     image: redis:latest
     networks:
     - backend-services
+    volumes:
+    - ./redis/:/etc/redis/
+    command:
+    - '/etc/redis/redis.conf'
 
   prometheus:
     image: prom/prometheus:v2.5.0

@@ -21,8 +21,11 @@ type UserStorageI interface {
 	GetByEmail(email string) (models.User, bool, error)
 	GetByUsername(username string) (models.User, bool, error)
 
+	GetLevelByNumber(number int) (models.LevelInStorage, error)
+
 	UpdateUser(uid int32, update models.UserUpdate) (models.User, error)
 	UpdateScore(uid int, newScore int) error
+	UpdateLevel(uid int, newLevel int) error
 
 	CheckExists(models.User) (usernameExist bool, emailExist bool, err error)
 	Login(username string, password string) (models.User, error)
@@ -149,4 +152,23 @@ func (s *UserStorage) CheckExists(user models.User) (usernameExist bool, emailEx
 		err = errors.Wrap(err, "can't get user by email")
 	}
 	return
+}
+
+var getLevel = `SELECT * FROM default_mult_levels WHERE number = $1;`
+
+func (s *UserStorage) GetLevelByNumber(number int) (models.LevelInStorage, error) {
+	level := models.LevelInStorage{}
+	if err := s.DB.Get(&level, getLevel, number); err != nil {
+		return level, errors.Wrap(err, "can't select level from DB")
+	}
+	return level, nil
+}
+
+var updateLevel = `UPDATE "user" SET level = $1 WHERE uID = $2;`
+
+func (s *UserStorage) UpdateLevel(uid int, newLevel int) error {
+	if _, err := s.DB.Exec(updateLevel, newLevel, uid); err != nil {
+		return errors.Wrap(err, "can't update user level")
+	}
+	return nil
 }

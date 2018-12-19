@@ -1,14 +1,14 @@
 package public_api_server
 
 import (
+	"2018_2_Stacktivity/pkg/responses"
 	"2018_2_Stacktivity/pkg/session"
 	"context"
 	"net/http"
 	"strconv"
 
-	"github.com/prometheus/client_golang/prometheus"
-
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func corsMiddleware(next http.Handler) http.Handler {
@@ -19,6 +19,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 			w.Header().Set("Access-Control-Allow-Methods", config.AllowedMethods)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			w.Header().Set("X-Vasily", "58")
 
 			if r.Method == http.MethodOptions {
 				w.WriteHeader(http.StatusOK)
@@ -60,11 +61,12 @@ func (srv *Server) authMiddleware(next http.Handler) http.Handler {
 			var sess *session.Session
 			var id uuid.UUID
 			ctx := r.Context()
-			s, err := r.Cookie("session-server-id")
+			value, err := responses.GetValueFromCookie(r, "sessionID")
+			println("value: " + value)
 			if err == http.ErrNoCookie {
 				isAuth = false
 			} else {
-				id, err = uuid.Parse(s.Value)
+				id, err = uuid.Parse(value)
 				if err != nil {
 					srv.log.Warnln("can't parse ")
 					ctx = context.WithValue(ctx, "isAuth", false)

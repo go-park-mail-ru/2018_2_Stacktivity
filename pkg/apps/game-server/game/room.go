@@ -2,7 +2,10 @@ package game
 
 import (
 	"2018_2_Stacktivity/models"
+	"2018_2_Stacktivity/storage"
+	"encoding/json"
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,6 +14,7 @@ import (
 type Room struct {
 	ID         string
 	players    []*Player
+	levelNum   int
 	Ticker     *time.Ticker
 	Message    chan *IncomingMessage
 	Broadcast  chan *models.Message
@@ -18,7 +22,7 @@ type Room struct {
 	stopchanel chan interface{}
 }
 
-func NewRoom(players []*Player, rm *RoomManager) *Room {
+func NewRoom(players []*Player) *Room {
 	log.Println("creating game...")
 	return &Room{ID: uuid.New().String(),
 		players:    players,
@@ -40,18 +44,17 @@ func (r *Room) Start() {
 	case 2:
 		r.players[0].enemy = r.players[1]
 		r.players[1].enemy = r.players[0]
+
+		s1 := rand.NewSource(time.Now().UnixNano())
+		r1 := rand.New(s1)
+		r.levelNum = r1.Intn(12)
+
 		go r.RunBroadcast()
 		for _, p := range r.players {
 			p.StartMultiplayer()
 			go p.Listen()
 		}
 		go r.ListenToPlayers()
-	}
-
-	r.Ticker = time.NewTicker(time.Second)
-	for {
-		<-r.Ticker.C
-		// TODO add some work
 	}
 }
 
@@ -75,39 +78,100 @@ func (r *Room) ListenToPlayers() {
 			switch m.Message.Event {
 			case models.UpdateCurv:
 				log.Println("Update curv")
-				if CheckCurve() {
-					UpdateCurve()
-					if len(r.players) == 2 {
-						m.Player.enemy.Send(m.Message)
-					}
-
-				} else {
-					r.Broadcast <- &models.Message{Event: models.InvalidDrop}
-				}
+				//if CheckCurve() {
+				//	UpdateCurve()
+				//	if len(r.players) == 2 {
+				//		m.Player.enemy.Send(m.Message)
+				//	}
+				//
+				//} else {
+				//	r.Broadcast <- &models.Message{Event: models.InvalidDrop}
+				//}
 			case models.EndCurv:
 				log.Println("End curv")
 				if len(r.players) == 2 {
 					m.Player.enemy.Send(m.Message)
 				}
-				StartCurve(m.Message.Line)
+				//StartCurve(m.Message.Line)
 			case models.GetLevel:
 				log.Println("Get level ", m.Message.Level.LevelNumber)
+				var level models.Level
+
+				dbLevel, err := storage.GetUserStorage().GetLevelByNumber(m.Message.Level.LevelNumber)
+				if err != nil {
+					log.Println("PIZDA RULIU")
+					log.Println(err.Error())
+					return
+				}
+				if err := json.Unmarshal([]byte(dbLevel.Level), &level); err != nil {
+					log.Println(m.Player.user.FullLevel.Level)
+					log.Println("HUITA KAKAYA-TO")
+					log.Println(err.Error())
+					return
+				}
 				m.Player.Send(&models.Message{
 					Event: models.GetLevel,
-					Level: &models.Level{
-						LevelNumber: 0,
-						Circles: []models.Circle{
-							{
-								Number: 0,
-								X:      636,
-								Y:      360,
-								R:      80,
-								Type:   "goal",
-								Color:  "Blue",
-							},
-						},
-					},
+					Level: &level,
 				})
+			case models.DataLoaded:
+				m.Player.logic.IsReady = true
+
+				if m.Player.enemy.logic.IsReady {
+					m.Player.logic.IsReady = false
+					m.Player.enemy.logic.IsReady = false
+
+					//TODO replace in gorutine
+					r.Broadcast <- &models.Message{Event: models.StartInput}
+
+					waiting := time.NewTimer(time.Second * 10)
+					<-waiting.C
+					r.Broadcast <- &models.Message{Event: models.FinishInput}
+				}
+			case models.LineInputted:
+				m.Player.logic.IsReady = true
+				m.Player.logic.Line = m.Message.Line
+
+				if m.Player.enemy.logic.IsReady {
+					if m.Player.logic.Line != nil || m.Player.enemy.logic.Line != nil {
+						m.Player.logic.IsReady = false
+						m.Player.enemy.logic.IsReady = false
+
+						r.players[0].Send(&models.Message{Event: models.GameProcess,
+							Line: r.players[1].logic.Line})
+						r.players[1].Send(&models.Message{Event: models.GameProcess,
+							Line: r.players[0].logic.Line})
+					} else {
+						m.Player.logic.IsReady = false
+						m.Player.enemy.logic.IsReady = false
+
+						r.Broadcast <- &models.Message{Event: models.StartInput}
+
+						waiting := time.NewTimer(time.Second * 10)
+						<-waiting.C
+						r.Broadcast <- &models.Message{Event: models.FinishInput}
+					}
+				}
+			case models.PlayerFailure:
+				m.Player.logic.IsFailure = true
+
+				if m.Player.enemy.logic.IsFailure || m.Player.enemy.logic.Line == nil {
+					m.Player.logic.IsFailure = false
+					m.Player.enemy.logic.IsFailure = false
+
+					m.Player.logic.Line = nil
+					m.Player.logic.Line = nil
+
+					r.Broadcast <- &models.Message{Event: models.StartInput}
+
+					waiting := time.NewTimer(time.Second * 10)
+					<-waiting.C
+					r.Broadcast <- &models.Message{Event: models.FinishInput}
+				}
+			case models.PlayerSuccess:
+				m.Player.Send(&models.Message{Event: models.GameFinish,
+					Status: &models.StatusSuccess})
+				m.Player.enemy.Send(&models.Message{Event: models.GameFinish,
+					Status: &models.StatusFailure})
 			}
 		case p := <-r.Unregister:
 			log.Printf("Player %s exit", p.user.Username)

@@ -1,0 +1,1 @@
+ALTER TABLE public."user" ADD IF NOT EXISTS level INT DEFAULT 0 NULL;

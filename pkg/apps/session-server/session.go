@@ -26,20 +26,28 @@ func (sm *SessionManager) Create(ctx context.Context, in *session.Session) (*ses
 	log.Println("create session")
 	ID, err := uuid.NewUUID()
 	if err != nil {
-		return nil, errors.Wrap(err, "Can't create session-server ID")
+		err = errors.Wrap(err, "can't create session-server ID")
+		log.Println(err.Error())
+		return nil, err
 	}
 	sessionID := session.SessionID{ID: ID.String()}
 	dataSerialized, err := json.Marshal(in)
 	if err != nil {
-		return nil, errors.Wrap(err, "can't marshal session-server")
+		err = errors.Wrap(err, "can't marshal session-server")
+		log.Println(err.Error())
+		return nil, err
 	}
 	mkey := "sessions:" + sessionID.ID
 	result, err := redis.String(sm.sessions.Do("SET", mkey, dataSerialized, "EX", 86400))
 	if err != nil {
-		return nil, errors.Wrap(err, "can't insert valuer into redis")
+		err = errors.Wrap(err, "can't insert valuer into redis")
+		log.Println(err.Error())
+		return nil, err
 	}
 	if result != "OK" {
-		return nil, errors.New("result from redis is not OK: " + result)
+		err = errors.Wrap(err, "result from redis is not OK: "+result)
+		log.Println(err.Error())
+		return nil, err
 	}
 	return &sessionID, nil
 }
@@ -49,11 +57,15 @@ func (sm *SessionManager) Check(ctx context.Context, in *session.SessionID) (*se
 	mkey := "sessions:" + in.ID
 	data, err := redis.Bytes(sm.sessions.Do("GET", mkey))
 	if err != nil {
-		return nil, errors.Wrap(err, "can't get data")
+		err = errors.Wrap(err, "can't get data")
+		log.Println(err.Error())
+		return nil, err
 	}
 	sess := &session.Session{}
 	if err = sess.UnmarshalJSON(data); err != nil {
-		return nil, errors.Wrap(err, "can't unpack session-server data")
+		err = errors.Wrap(err, "can't unpack session-server data")
+		log.Println(err.Error())
+		return nil, err
 	}
 	return sess, nil
 }
@@ -63,7 +75,9 @@ func (sm *SessionManager) Delete(ctx context.Context, in *session.SessionID) (*s
 	mkey := "sessions:" + in.ID
 	_, err := redis.Int(sm.sessions.Do("DEL", mkey))
 	if err != nil {
-		return nil, errors.Wrap(err, "can't delete session")
+		err = errors.Wrap(err, "can't delete session")
+		log.Println(err.Error())
+		return nil, err
 	}
 	return &session.Nothing{Dummy: true}, nil
 }

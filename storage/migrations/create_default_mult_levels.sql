@@ -1,4 +1,4 @@
-CREATE TABLE public.default_mult_levels
+CREATE TABLE IF NOT EXISTS public.default_mult_levels
 (
     number int PRIMARY KEY NOT NULL,
     level json NOT NULL

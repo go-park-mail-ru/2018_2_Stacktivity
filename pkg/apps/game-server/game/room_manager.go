@@ -2,6 +2,7 @@ package game
 
 import (
 	"2018_2_Stacktivity/models"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,7 +34,7 @@ func (rm *RoomManager) Run() {
 			PlayersPendingRoomMetric.With(labelTypeSingle).Dec() // players pending room metric update
 			RoomCountMetric.With(labelTypeSingle).Inc()          // room metric update
 
-			room := NewRoom([](*Player){player}, rm)
+			room := NewRoom([](*Player){player})
 			player.room = room
 			go room.Start()
 		case p := <-rm.queue:
@@ -43,7 +44,7 @@ func (rm *RoomManager) Run() {
 				PlayersPendingRoomMetric.With(labelTypeMult).Sub(2) // players pending room metric update
 				RoomCountMetric.With(labelTypeMult).Inc()           // room metric update
 
-				room := NewRoom(pair, rm)
+				room := NewRoom(pair)
 				for _, p := range pair {
 					p.room = room
 				}

@@ -6,10 +6,13 @@ import (
 	"encoding/json"
 	"log"
 
+	"sync"
+
 	"github.com/gorilla/websocket"
 )
 
 type Player struct {
+	mu    sync.Mutex
 	user  *models.User
 	enemy *Player
 	room  *Room
@@ -23,7 +26,7 @@ type IncomingMessage struct {
 }
 
 func NewPlayer(user *models.User, conn *websocket.Conn) *Player {
-	return &Player{user: user, conn: conn}
+	return &Player{mu: sync.Mutex{}, user: user, conn: conn}
 }
 
 func (p *Player) Listen() {
@@ -45,6 +48,8 @@ func (p *Player) Listen() {
 }
 
 func (p *Player) Send(s *models.Message) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	if err := p.conn.WriteJSON(s); err != nil {
 		log.Printf("can't send message to player %s\n", p.user.Username)
 		p.room.Unregister <- p

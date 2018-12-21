@@ -69,12 +69,9 @@ func (p *Player) CheckConn() {
 
 func (p *Player) Listen() {
 	defer p.conn.Close()
-	p.conn.SetReadDeadline(time.Now().Add(pongWait))
-	p.conn.SetPongHandler(func(string) error { p.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
 		if p.room != nil {
 			m := &models.Message{}
-			p.conn.SetReadDeadline(time.Now().Add(pongWait))
 			err := p.conn.ReadJSON(m)
 			if websocket.IsUnexpectedCloseError(err) {
 				log.Printf("player %d was disconnected", p.user.ID)

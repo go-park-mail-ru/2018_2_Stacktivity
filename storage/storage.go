@@ -26,6 +26,7 @@ type UserStorageI interface {
 	UpdateUser(uid int32, update models.UserUpdate) (models.User, error)
 	UpdateScore(uid int, newScore int) error
 	UpdateLevel(uid int, newLevel int) error
+	AddScore(id int32, score int) error
 
 	CheckExists(models.User) (usernameExist bool, emailExist bool, err error)
 	Login(username string, password string) (models.User, error)
@@ -137,6 +138,13 @@ var update = `UPDATE "user" SET $2 = $3 WHERE uID = $1;`
 
 func (s *UserStorage) updateRow(id int, field string, value interface{}) error {
 	_, err := s.DB.Exec(update, id, field, value)
+	return err
+}
+
+var addScore = `UPDATE "user" SET score = score + $2 WHERE uID = $1;`
+
+func (s *UserStorage) AddScore(id int32, score int) error {
+	_, err := s.DB.Exec(addScore, id, score)
 	return err
 }
 

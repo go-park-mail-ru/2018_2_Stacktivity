@@ -172,6 +172,9 @@ func (r *Room) ListenToPlayers() {
 					Status: &models.StatusSuccess})
 				m.Player.enemy.Send(&models.Message{Event: models.GameFinish,
 					Status: &models.StatusFailure})
+				if err := storage.GetUserStorage().AddScore(m.Player.user.ID, 50); err != nil {
+					log.Println("Can't update user score:", err.Error())
+				}
 			}
 		case p := <-r.Unregister:
 			log.Printf("Player %s exit", p.user.Username)

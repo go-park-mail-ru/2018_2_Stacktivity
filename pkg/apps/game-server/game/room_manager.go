@@ -54,6 +54,8 @@ func (rm *RoomManager) Run() {
 				rm.rooms[room.ID] = room
 				go room.Start()
 				pair = make([]*Player, 0)
+			} else {
+				pair[0].conn = p.conn
 			}
 		case <-rm.stopchan:
 			rm.log.Println("stopping game manager...")

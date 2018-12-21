@@ -47,8 +47,6 @@ func GetValueFromCookie(r *http.Request, name string) (string, error) {
 		log.Println("can't get cookie from request " + err.Error())
 		return "", err
 	}
-	log.Println("Value:", cookie.Value)
-	log.Println("Secure:", cookie.Secure)
 	var value string
 	err = s.Decode(name, cookie.Value, &value)
 	if err != nil {

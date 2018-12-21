@@ -51,17 +51,15 @@ func (p *Player) CheckConn() {
 	}()
 
 	for {
-		select {
-		case <-ticker.C:
-			p.mu.Lock()
-			p.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := p.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				p.mu.Unlock()
-				p.isOpen = false
-				return
-			}
+		<-ticker.C
+		p.mu.Lock()
+		p.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		if err := p.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 			p.mu.Unlock()
+			p.isOpen = false
+			return
 		}
+		p.mu.Unlock()
 	}
 }
 
@@ -89,7 +87,6 @@ func (p *Player) Listen() {
 			_, _, err := p.conn.ReadMessage()
 			if err != nil {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-					p.mu.Unlock()
 					p.isOpen = false
 					return
 				}

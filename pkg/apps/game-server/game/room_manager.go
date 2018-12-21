@@ -45,10 +45,7 @@ func (rm *RoomManager) Run() {
 				pair = append(pair, p)
 				rm.log.Println("check ws connections")
 				for _, p := range pair {
-					p.mu.Lock()
-					err := p.conn.WriteJSON(models.Message{Event: models.CreateConn})
-					p.mu.Unlock()
-					if err == nil {
+					if p.isOpen {
 						filter = append(filter, p)
 					}
 				}

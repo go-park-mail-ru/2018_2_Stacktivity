@@ -39,7 +39,6 @@ func (r *Room) Start() {
 		// TODO add validate game-server for singleplayer
 		log.Println("Start singleplayer")
 		go r.RunBroadcast()
-		go r.players[0].Listen()
 		go r.ListenToPlayers()
 	case 2:
 		r.players[0].enemy = r.players[1]
@@ -52,7 +51,6 @@ func (r *Room) Start() {
 		go r.RunBroadcast()
 		for _, p := range r.players {
 			p.StartMultiplayer()
-			go p.Listen()
 		}
 		go r.ListenToPlayers()
 	}

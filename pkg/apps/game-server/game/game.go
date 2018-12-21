@@ -28,7 +28,8 @@ func (g *Game) RunSinglePlayer(user *models.User, ws *websocket.Conn) {
 
 func (g *Game) AddPlayer(user *models.User, ws *websocket.Conn) {
 	player := NewPlayer(user, ws)
-
+	go player.CheckConn()
+	go player.Listen()
 	PlayersPendingRoomMetric.With(labelTypeMult).Inc()
 	g.rm.queue <- player
 }

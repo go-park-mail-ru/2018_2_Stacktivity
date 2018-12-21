@@ -101,8 +101,11 @@ func (p *Player) Listen() {
 }
 
 func (p *Player) Send(s *models.Message) {
+	log.Println("sending message to " + p.user.Username)
+	log.Println("Event:", s.Event)
 	p.mu.Lock()
 	err := p.conn.WriteJSON(s)
+	log.Println("sending message to " + p.user.Username + " done")
 	p.mu.Unlock()
 	if err != nil {
 		log.Printf("can't send message to player %s\n", p.user.Username)

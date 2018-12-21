@@ -45,7 +45,7 @@ func (rm *RoomManager) Run() {
 				pair = append(pair, p)
 				rm.log.Println("check ws connections")
 				for _, p := range pair {
-					_, _, err := p.conn.ReadMessage()
+					err := p.conn.WriteJSON(models.Message{Event: models.CreateConn})
 					if err == nil {
 						filter = append(filter, p)
 					}

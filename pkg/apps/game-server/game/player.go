@@ -74,6 +74,7 @@ func (p *Player) Listen() {
 	for {
 		if p.room != nil {
 			m := &models.Message{}
+			p.conn.SetReadDeadline(time.Now().Add(pongWait))
 			err := p.conn.ReadJSON(m)
 			if websocket.IsUnexpectedCloseError(err) {
 				log.Printf("player %d was disconnected", p.user.ID)
@@ -86,6 +87,7 @@ func (p *Player) Listen() {
 				Player:  p,
 				Message: m,
 			}
+			log.Println("Read event", m.Event)
 			p.room.Message <- im
 		} else {
 			_, _, err := p.conn.ReadMessage()

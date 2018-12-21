@@ -3,9 +3,12 @@ package public_api_server
 import (
 	"2018_2_Stacktivity/models"
 	"2018_2_Stacktivity/pkg/responses"
+	"2018_2_Stacktivity/pkg/session"
+	"2018_2_Stacktivity/storage"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -48,7 +51,27 @@ func (srv *Server) createUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	responses.Write(w, http.StatusCreated, newUser)
+
+	user, err := srv.users.Login(newUser.Username, newUser.Password)
+	if err != nil {
+		if err == storage.ErrNotFound || err == storage.ErrIncorrectPassword {
+			responses.Write(w, http.StatusBadRequest, "Incorrect login or password")
+		} else {
+			srv.log.Warnln("can't login user", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+	sess, err := srv.sm.Create(r.Context(), &session.Session{
+		ID: user.ID,
+	})
+	if err != nil {
+		srv.log.Warnln("can't create session-server", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	responses.WriteCookie(w, "sessionID", sess.ID, time.Now().Add(7*24*time.Hour))
+	responses.Write(w, http.StatusCreated, user)
 }
 
 func (srv *Server) getUser(w http.ResponseWriter, r *http.Request) {

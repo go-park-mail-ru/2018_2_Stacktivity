@@ -38,8 +38,11 @@ func (rm *RoomManager) Run() {
 			player.room = room
 			go room.Start()
 		case p := <-rm.queue:
-			pair = append(pair, p)
-			if len(pair) == 2 {
+			if len(pair) == 0 {
+				pair = append(pair, p)
+			} else if pair[0].user.Username != p.user.Username {
+				pair = append(pair, p)
+
 				rm.log.Printf("find game-server: %s vs %s \n", pair[0].user.Username, pair[1].user.Username)
 				PlayersPendingRoomMetric.With(labelTypeMult).Sub(2) // players pending room metric update
 				RoomCountMetric.With(labelTypeMult).Inc()           // room metric update

@@ -54,12 +54,16 @@ func (p *Player) CheckConn() {
 		<-ticker.C
 		p.mu.Lock()
 		p.conn.SetWriteDeadline(time.Now().Add(writeWait))
-		if err := p.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+		err := p.conn.WriteMessage(websocket.PingMessage, nil)
+		p.mu.Unlock()
+		if err != nil {
 			p.mu.Unlock()
+			log.Printf("can't send message to player %s\n", p.user.Username)
+			log.Println(err.Error())
+			p.room.Unregister <- p
 			p.isOpen = false
 			return
 		}
-		p.mu.Unlock()
 	}
 }
 
@@ -98,7 +102,6 @@ func (p *Player) Listen() {
 
 func (p *Player) Send(s *models.Message) {
 	p.mu.Lock()
-	p.conn.SetWriteDeadline(time.Now().Add(writeWait))
 	err := p.conn.WriteJSON(s)
 	p.mu.Unlock()
 	if err != nil {

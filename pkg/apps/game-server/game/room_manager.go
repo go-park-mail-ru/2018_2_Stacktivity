@@ -68,6 +68,7 @@ func (rm *RoomManager) Run() {
 				}
 			} else {
 				pair[0].conn = p.conn
+				p.isOpen = true
 			}
 		case <-rm.stopchan:
 			rm.log.Println("stopping game manager...")

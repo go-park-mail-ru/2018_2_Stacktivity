@@ -67,8 +67,7 @@ func (rm *RoomManager) Run() {
 					filter = make([]*Player, 0)
 				}
 			} else {
-				pair[0].conn = p.conn
-				pair[0].isOpen = true
+				pair = []*Player{p}
 			}
 		case <-rm.stopchan:
 			rm.log.Println("stopping game manager...")

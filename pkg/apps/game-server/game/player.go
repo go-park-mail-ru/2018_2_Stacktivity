@@ -59,7 +59,6 @@ func (p *Player) CheckConn() {
 		if err != nil {
 			log.Printf("can't send message to player %s\n", p.user.Username)
 			log.Println(err.Error())
-			p.room.Unregister <- p
 			p.isOpen = false
 			return
 		}

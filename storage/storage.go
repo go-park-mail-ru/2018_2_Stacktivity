@@ -62,7 +62,7 @@ func (s *UserStorage) GetAll() (users []models.User, err error) { //
 	return users, nil
 }
 
-var getAllWithOptions = `SELECT uid, username, email, score FROM "user" ORDER BY score DESC LIMIT $1 OFFSET $2;`
+var getAllWithOptions = `SELECT uid, username, email, score FROM "user" ORDER BY score DESC, uid ASC LIMIT $1 OFFSET $2;`
 
 func (s *UserStorage) GetAllWithOptions(limit int, offset int) ([]models.User, error) { //
 	users := []models.User{}

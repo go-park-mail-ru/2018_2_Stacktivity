@@ -57,7 +57,6 @@ func (p *Player) CheckConn() {
 		err := p.conn.WriteMessage(websocket.PingMessage, nil)
 		p.mu.Unlock()
 		if err != nil {
-			p.mu.Unlock()
 			log.Printf("can't send message to player %s\n", p.user.Username)
 			log.Println(err.Error())
 			p.room.Unregister <- p
@@ -70,31 +69,24 @@ func (p *Player) CheckConn() {
 func (p *Player) Listen() {
 	defer p.conn.Close()
 	for {
-		if p.room != nil {
-			m := &models.Message{}
-			err := p.conn.ReadJSON(m)
-			if websocket.IsUnexpectedCloseError(err) {
-				log.Printf("player %d was disconnected", p.user.ID)
+		m := &models.Message{}
+		err := p.conn.ReadJSON(m)
+		if websocket.IsUnexpectedCloseError(err) {
+			log.Printf("player %d was disconnected", p.user.ID)
+			if p.room != nil {
 				p.room.Unregister <- p
-				p.isOpen = false
-				log.Println("player deleted")
-				return
 			}
+			p.isOpen = false
+			log.Println("player deleted")
+			return
+		}
+		if p.room != nil {
 			im := &IncomingMessage{
 				Player:  p,
 				Message: m,
 			}
 			log.Println("Read event", m.Event)
 			p.room.Message <- im
-		} else {
-			_, _, err := p.conn.ReadMessage()
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
-					p.isOpen = false
-					return
-				}
-				break
-			}
 		}
 	}
 }

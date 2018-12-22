@@ -157,7 +157,7 @@ func (r *Room) ListenToPlayers() {
 					m.Player.enemy.logic.IsFailure = false
 
 					m.Player.logic.Line = nil
-					m.Player.logic.Line = nil
+					m.Player.enemy.logic.Line = nil
 
 					r.Broadcast <- &models.Message{Event: models.StartInput}
 

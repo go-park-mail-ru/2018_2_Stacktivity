@@ -39,7 +39,6 @@ func (r *Room) Start() {
 		// TODO add validate game-server for singleplayer
 		log.Println("Start singleplayer")
 		go r.RunBroadcast()
-		go r.players[0].Listen()
 		go r.ListenToPlayers()
 	case 2:
 		r.players[0].enemy = r.players[1]
@@ -52,7 +51,6 @@ func (r *Room) Start() {
 		go r.RunBroadcast()
 		for _, p := range r.players {
 			p.StartMultiplayer()
-			go p.Listen()
 		}
 		go r.ListenToPlayers()
 	}
@@ -159,7 +157,7 @@ func (r *Room) ListenToPlayers() {
 					m.Player.enemy.logic.IsFailure = false
 
 					m.Player.logic.Line = nil
-					m.Player.logic.Line = nil
+					m.Player.enemy.logic.Line = nil
 
 					r.Broadcast <- &models.Message{Event: models.StartInput}
 
@@ -172,6 +170,9 @@ func (r *Room) ListenToPlayers() {
 					Status: &models.StatusSuccess})
 				m.Player.enemy.Send(&models.Message{Event: models.GameFinish,
 					Status: &models.StatusFailure})
+				if err := storage.GetUserStorage().AddScore(m.Player.user.ID, 50); err != nil {
+					log.Println("Can't update user score:", err.Error())
+				}
 			}
 		case p := <-r.Unregister:
 			log.Printf("Player %s exit", p.user.Username)

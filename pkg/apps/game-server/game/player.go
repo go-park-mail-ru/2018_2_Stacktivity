@@ -6,15 +6,21 @@ import (
 	"encoding/json"
 	"log"
 
+	"sync"
+
+	"time"
+
 	"github.com/gorilla/websocket"
 )
 
 type Player struct {
-	user  *models.User
-	enemy *Player
-	room  *Room
-	conn  *websocket.Conn
-	logic models.PlayerLogic
+	mu     sync.Mutex
+	user   *models.User
+	enemy  *Player
+	room   *Room
+	conn   *websocket.Conn
+	logic  models.PlayerLogic
+	isOpen bool
 }
 
 type IncomingMessage struct {
@@ -22,31 +28,78 @@ type IncomingMessage struct {
 	Message *models.Message
 }
 
+const (
+	// Time allowed to write a message to the peer.
+	writeWait = 60 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 60 * time.Second
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
+)
+
 func NewPlayer(user *models.User, conn *websocket.Conn) *Player {
-	return &Player{user: user, conn: conn}
+	return &Player{mu: sync.Mutex{}, user: user, conn: conn, isOpen: true}
+}
+
+func (p *Player) CheckConn() {
+	ticker := time.NewTicker(pingPeriod)
+	defer func() {
+		ticker.Stop()
+		p.conn.Close()
+	}()
+
+	for {
+		<-ticker.C
+		p.mu.Lock()
+		p.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		err := p.conn.WriteMessage(websocket.PingMessage, nil)
+		p.mu.Unlock()
+		if err != nil {
+			log.Printf("can't send message to player %s\n", p.user.Username)
+			log.Println(err.Error())
+			p.isOpen = false
+			return
+		}
+	}
 }
 
 func (p *Player) Listen() {
+	defer p.conn.Close()
 	for {
 		m := &models.Message{}
 		err := p.conn.ReadJSON(m)
 		if websocket.IsUnexpectedCloseError(err) {
 			log.Printf("player %d was disconnected", p.user.ID)
-			p.room.Unregister <- p
+			if p.room != nil {
+				p.room.Unregister <- p
+			}
+			p.isOpen = false
 			log.Println("player deleted")
 			return
 		}
-		im := &IncomingMessage{
-			Player:  p,
-			Message: m,
+		if p.room != nil {
+			im := &IncomingMessage{
+				Player:  p,
+				Message: m,
+			}
+			log.Println("Read event", m.Event)
+			p.room.Message <- im
 		}
-		p.room.Message <- im
 	}
 }
 
 func (p *Player) Send(s *models.Message) {
-	if err := p.conn.WriteJSON(s); err != nil {
+	log.Println("sending message to " + p.user.Username)
+	log.Println("Event:", s.Event)
+	p.mu.Lock()
+	err := p.conn.WriteJSON(s)
+	log.Println("sending message to " + p.user.Username + " done")
+	p.mu.Unlock()
+	if err != nil {
 		log.Printf("can't send message to player %s\n", p.user.Username)
+		log.Println(err.Error())
 		p.room.Unregister <- p
 	}
 }

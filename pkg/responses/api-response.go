@@ -28,10 +28,10 @@ func WriteCookie(w http.ResponseWriter, name string, value string, expires time.
 	log.Println("Write cookie name:", name)
 	if encoded, err := s.Encode(name, value); err == nil {
 		cookie := http.Cookie{
-			Name:     name,
-			Value:    encoded,
-			Expires:  time.Now().Add(365 * 24 * time.Hour),
-			Secure:   true,
+			Name:    name,
+			Value:   encoded,
+			Expires: time.Now().Add(365 * 24 * time.Hour),
+			// Secure:   true,
 			HttpOnly: true,
 		}
 		http.SetCookie(w, &cookie)
@@ -47,8 +47,6 @@ func GetValueFromCookie(r *http.Request, name string) (string, error) {
 		log.Println("can't get cookie from request " + err.Error())
 		return "", err
 	}
-	log.Println("Value:", cookie.Value)
-	log.Println("Secure:", cookie.Secure)
 	var value string
 	err = s.Decode(name, cookie.Value, &value)
 	if err != nil {

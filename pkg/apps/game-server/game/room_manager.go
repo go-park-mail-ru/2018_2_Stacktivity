@@ -27,6 +27,7 @@ func NewRoomManager(logger *log.Logger) *RoomManager {
 func (rm *RoomManager) Run() {
 	log.Println("Starting room manager")
 	pair := make([]*Player, 0)
+	filter := make([]*Player, 0)
 	for {
 		select {
 		case player := <-rm.singleplayer:
@@ -38,19 +39,35 @@ func (rm *RoomManager) Run() {
 			player.room = room
 			go room.Start()
 		case p := <-rm.queue:
-			pair = append(pair, p)
-			if len(pair) == 2 {
-				rm.log.Printf("find game-server: %s vs %s \n", pair[0].user.Username, pair[1].user.Username)
-				PlayersPendingRoomMetric.With(labelTypeMult).Sub(2) // players pending room metric update
-				RoomCountMetric.With(labelTypeMult).Inc()           // room metric update
-
-				room := NewRoom(pair)
+			if len(pair) == 0 {
+				pair = append(pair, p)
+			} else if pair[0].user.Username != p.user.Username {
+				pair = append(pair, p)
+				rm.log.Println("check ws connections")
 				for _, p := range pair {
-					p.room = room
+					if p.isOpen {
+						filter = append(filter, p)
+					}
 				}
-				rm.rooms[room.ID] = room
-				go room.Start()
-				pair = make([]*Player, 0)
+				if len(pair) == len(filter) {
+					rm.log.Printf("find game-server: %s vs %s \n", pair[0].user.Username, pair[1].user.Username)
+					PlayersPendingRoomMetric.With(labelTypeMult).Sub(2) // players pending room metric update
+					RoomCountMetric.With(labelTypeMult).Inc()           // room metric update
+
+					room := NewRoom(pair)
+					for _, p := range pair {
+						p.room = room
+					}
+					rm.rooms[room.ID] = room
+					go room.Start()
+					pair = make([]*Player, 0)
+					filter = make([]*Player, 0)
+				} else {
+					pair = filter
+					filter = make([]*Player, 0)
+				}
+			} else {
+				pair = []*Player{p}
 			}
 		case <-rm.stopchan:
 			rm.log.Println("stopping game manager...")

@@ -1,8 +1,6 @@
 # 2018_2_Stacktivity
 
-Задеплоенный проект: http://blep.me/
-
-<a href="http://128.68.165.22:3000/docs">OpenAPI</a> 
+Задеплоенный проект: https://blep.me/
 
 <a href="https://github.com/frontend-park-mail-ru/2018_2_Stacktivity">Репа фронта тут</a>
 

@@ -39,7 +39,7 @@ func (w *statusWriter) WriteHeader(code int) {
 	if code != 0 {
 		w.statusCode = code
 	} else {
-		w.statusCode = 200
+		w.statusCode = http.StatusOK
 	}
 
 	w.ResponseWriter.WriteHeader(code)
@@ -47,9 +47,8 @@ func (w *statusWriter) WriteHeader(code int) {
 
 func (srv *Server) metricsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		writter := statusWriter{w, 200}
+		writter := statusWriter{w, http.StatusOK}
 		next.ServeHTTP(&writter, r)
-		//log.Println("metric increment")
 		ApiMetric.With(prometheus.Labels{"code": strconv.Itoa(writter.statusCode), "path": r.URL.Path, "method": r.Method}).Inc()
 	})
 }

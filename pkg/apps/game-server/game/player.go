@@ -114,12 +114,10 @@ func (p *Player) StartMultiplayer() {
 
 	dbLevel, err := storage.GetUserStorage().GetLevelByNumber(p.room.levelNum)
 	if err != nil {
-		log.Println("PIZDA RULIU")
 		log.Println(err.Error())
 		return
 	}
 	if err := json.Unmarshal([]byte(dbLevel.Level), &level); err != nil {
-		log.Println("HUITA KAKAYA-TO")
 		log.Println(err.Error())
 		return
 	}

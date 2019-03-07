@@ -74,7 +74,6 @@ func StartApp() {
 	flag.Parse()
 	logger := log.New()
 	logger.SetLevel(log.InfoLevel)
-	// TODO add hook for logrus
 	logger.SetOutput(os.Stdout)
 	err := storage.InitDB(config.DB)
 	if err != nil {
